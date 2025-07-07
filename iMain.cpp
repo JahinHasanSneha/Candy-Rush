@@ -82,18 +82,18 @@ struct Frosting
 };
 struct Frosting frostings[MAX_FROSTINGS];
 
-char welcomePage[30] = "UI/WelcomeNew.png";
-char menuPage[30] = "UI/MenuNew.png";
-char howToPlay[30] = "UI/HowToPlayNew2.png";
-char musicControl[30] = "UI/MusicControlNew.png";
-char about[20] = "UI/About.png";
-char gameOver[20] = "UI/GameOver.png";
-char purple[30] = "Button/purple.png";
-char tealBlue[30] = "Button/tealBlue.png";
-char pink[30] = "Button/pink.png";
-char gems[30] = "ExtraLabels/Gems.png";
-char heart[30] = "ExtraLabels/heart.png";
-char coin[30] = "ExtraLabels/coin.png";
+char welcomePage[30] = "Candy-Rush/UI/WelcomeNew.png";
+char menuPage[30] = "Candy-Rush/UI/MenuNew.png";
+char howToPlay[50] = "Candy-Rush/UI/HowToPlayNew2.png";
+char musicControl[50] = "Candy-Rush/UI/MusicControlNew.png";
+char about[50] = "Candy-Rush/UI/About.png";
+char gameOver[50] = "Candy-Rush/UI/GameOver.png";
+char purple[50] = "Candy-Rush/Button/purple.png";
+char tealBlue[50] = "Candy-Rush/Button/tealBlue.png";
+char pink[50] = "Candy-Rush/Button/pink.png";
+char gems[50] = "Candy-Rush/ExtraLabels/Gems.png";
+char heart[50] = "Candy-Rush/ExtraLabels/Gems.png";
+char coin[50] = "Candy-Rush/ExtraLabels/coin.png";
 
 bool standPosition = true;
 int standCount = 0;
@@ -194,12 +194,12 @@ void drawTimer()
 {
     if (gameState == 1)
     {
-        iShowImage(1190, screenwidth - 38, purple);
+        iShowImage(1190, screenwidth - 38,"Candy-Rush/Button/purple.png");
 
         iSetColor(255, 255, 255);
         sprintf(sec, "Time: %d", second);
         iText(1160, screenwidth - 80, sec, GLUT_BITMAP_HELVETICA_10);
-        iShowImage(1051, screenwidth - 52, coin);
+        iShowImage(1051, screenwidth - 52,  "Candy-Rush/ExtraLabels/coin.png");
         iSetColor(255, 255, 255);
         sprintf(point, "Score: %d", score);
         iText(1207, screenwidth - 41, point, GLUT_BITMAP_HELVETICA_10);
@@ -226,7 +226,7 @@ void GameOver()
 {
     iSetColor(128, 128, 128);
     iFilledRectangle(0, 0, screenwidth, screenlength);
-    iShowImage(0, 0, GameOverScene);
+    iShowImage(0, 0,"Candy-Rush/UI/GameOver.png");
     gameState = 2;
 }
 void iMouse(int button, int state, int mx, int my)
@@ -396,7 +396,7 @@ void iDraw()
 
     if (gameState == -1)
     {
-        iShowImage(0, 0, welcomePage);
+        iShowImage(0, 0, "Candy-Rush/UI/WelcomeNew.png");
         loading++;
         if (loading > 10)
         {
@@ -516,9 +516,9 @@ void iDraw()
         // Display Total Coins Collected
         char frostingText[50];
         sprintf(frostingText, "%d", totalFrostingCollected);
-        iShowImage(685, screenwidth - 43, tealBlue);
+        iShowImage(685, screenwidth - 43, "Candy-Rush/Button/tealBlue.png");
         iText(695, screenwidth - 40, frostingText, GLUT_BITMAP_HELVETICA_10);
-        iShowImage(540, screenwidth - 43, gems);
+        iShowImage(540, screenwidth - 43, "Candy-Rush/ExtraLabels/Gems.png");
 
         // Check for coin collection
         checkFrostingCollection();
@@ -529,18 +529,18 @@ void iDraw()
         iText(54, screenwidth - 30, collisionText, GLUT_BITMAP_HELVETICA_10);
         if ((3 - collisionNumber) == 3)
         {
-            iShowImage(23, screenwidth - 80, heart);
-            iShowImage(75, screenwidth - 80, heart);
-            iShowImage(123, screenwidth - 80, heart);
+            iShowImage(23, screenwidth - 80, "Candy-Rush/ExtraLabels/Gems.png");
+        iShowImage(75, screenwidth - 80,"Candy-Rush/ExtraLabels/Gems.png");
+            iShowImage(123, screenwidth - 80, "Candy-Rush/ExtraLabels/Gems.png");
         }
         else if ((3 - collisionNumber) == 2)
         {
-            iShowImage(23, screenwidth - 80, heart);
-            iShowImage(75, screenwidth - 80, heart);
+            iShowImage(23, screenwidth - 80,"Candy-Rush/ExtraLabels/Gems.png");
+            iShowImage(75, screenwidth - 80, "Candy-Rush/ExtraLabels/Gems.png");
         }
         else if ((3 - collisionNumber) == 1)
         {
-            iShowImage(23, screenwidth - 80, heart);
+            iShowImage(23, screenwidth - 80,"Candy-Rush/ExtraLabels/Gems.png");
         }
 
         gainSpeedUpPower();
@@ -584,14 +584,14 @@ char gameOver[20] = "UI//GameOver.png";
     else if (gameState == 3)
     {
 
-        iShowImage(0, 0, howToPlay);
+        iShowImage(0, 0,"Candy-Rush/UI/HowToPlayNew2.png");
     }
 
     // Options
     else if (gameState == 4)
     {
 
-        iShowImage(0, 0, musicControl);
+        iShowImage(0, 0, "Candy-Rush/UI/MusicControlNew.png");
         /* if (musicOn)
          {
              iShowBMP2(screenlength / 2 - 120, screenwidth / 2 - 100, musicOnpic, 0);

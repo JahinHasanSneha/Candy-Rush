@@ -2,49 +2,52 @@
 #include <Windows.h>
 #include <time.h>
 #include <stdlib.h>
+#include <direct.h>
+
+
 
 #define screenwidth 731
 #define screenlength 1300
 
-bool runState;
+bool runState = false;
 int gameState = -1;
 int loading = 0;
 bool musicOn = true;
 int collisionNumber = 0;
-bool char_hurt = false;
+bool charHurt = false;
 bool importantSoundsOn = false;
 
 int X = 350;
 int Y = 75;
 int playerWidth = 88, playerHeight = 107;
 
-char bc[52][50] = {"Background\"Background\\tile000.png", "Background\\tile001.png", "Background\\tile002.png", "Background\\tile003.png",
-                   "Background\\tile004.png", "Background\\tile005.png", "Background\\tile006.png", "Background\\tile007.png", "Background\\tile008.png",
-                   "Background\\tile009.png", "Background\\tile010.png", "Background\\tile011.png", "Background\\tile0012.png", "Background\\tile013.png",
-                   "Background\\tile014.png", "Background\\tile015.png", "Background\\tile016.png", "Background\\tile017.png", "Background\\tile018.png",
-                   "Background\\tile019.png", "Background\\tile020.png", "Background\\tile021.png", "Background\\tile022.png", "Background\\tile023.png",
-                   "Background\\tile024.png", "Background\\tile025.png", "Background\\tile026.png", "Background\\tile027.png", "Background\\tile028.png",
-                   "Background\\tile029.png", "Background\\tile030.png", "Background\\tile031.png", "Background\\tile032.png", "Background\\tile033.png",
-                   "Background\\tile034.png", "Background\\tile035.png", "Background\\tile035.png", "Background\\tile036.png", "Background\\tile037.png",
-                   "Background\\tile038.png", "Background\\tile039.png", "Background\\tile040.png", "Background\\tile041.png", "Background\\tile042.png",
-                   "Background\\tile043.png", "Background\\tile044.png", "Background\\tile045.png", "Background\\tile046.png", "Background\\tile047.png",
-                   "Background\\tile048.png", "Background\\tile049.png"};
+char bc[51][50] = {"Candy-Rush/Background/tile000.png", "Candy-Rush/Background/tile001.png", "Candy-Rush/Background/tile002.png", "Candy-Rush/Background/tile003.png",
+                   "Candy-Rush/Background/tile004.png", "Candy-Rush/Background/tile005.png", "Candy-Rush/Background/tile006.png", "Candy-Rush/Background/tile007.png", "Candy-Rush/Background/tile008.png",
+                   "Candy-Rush/Background/tile009.png", "Candy-Rush/Background/tile010.png", "Candy-Rush/Background/tile011.png", "Candy-Rush/Background/tile0012.png", "Candy-Rush/Background/tile013.png",
+                   "Candy-Rush/Background/tile014.png", "Candy-Rush/Background/tile015.png", "Candy-Rush/Background/tile016.png", "Candy-Rush/Background/tile017.png", "Candy-Rush/Background/tile018.png",
+                   "Candy-Rush/Background/tile019.png", "Candy-Rush/Background/tile020.png", "Candy-Rush/Background/tile021.png", "Candy-Rush/Background/tile022.png", "Candy-Rush/Background/tile023.png",
+                   "Candy-Rush/Background/tile024.png", "Candy-Rush/Background/tile025.png", "Candy-Rush/Background/tile026.png", "Candy-Rush/Background/tile027.png", "Candy-Rush/Background/tile028.png",
+                   "Candy-Rush/Background/tile029.png", "Candy-Rush/Background/tile030.png", "Candy-Rush/Background/tile031.png", "Candy-Rush/Candy-Rush/Background/tile032.png", "Candy-Rush/Background/tile033.png",
+                   "Candy-Rush/Background/tile034.png", "Candy-Rush/Background/tile035.png", "Candy-Rush/Background/tile035.png", "Candy-Rush/Background/tile036.png", "Candy-Rush/Background/tile037.png",
+                   "Candy-Rush/Background/tile038.png", "Candy-Rush/Background/tile039.png", "Candy-Rush/Background/tile040.png", "Candy-Rush/Background/tile041.png", "Candy-Rush/Background/tile042.png",
+                   "Candy-Rush/Background/tile043.png", "Candy-Rush/Background/tile044.png", "Candy-Rush/Background/tile045.png", "Candy-Rush/Background/tile046.png", "Candy-Rush/Background/tile047.png",
+                   "Candy-Rush/Background/tile048.png", "Candy-Rush/Background/tile049.png"};
 
-// char back[][];
-char staticBack[50] = {"Background\\BackGround.png"};
+char staticBack[50] = {"Candy-Rush/Background/Candy-Rush/Background.png"};
 
-char idle[4][60] = {"Assets\\Pink_Monster_Idle.png\\Pink_Monster_Idle_4_1.png",
-                    "Assets\\Pink_Monster_Idle.png\\Pink_Monster_Idle_4_2.png",
-                    "Assets\\Pink_Monster_Idle.png\\Pink_Monster_Idle_4_3.png",
-                    "Assets\\Pink_Monster_Idle.png\\Pink_Monster_Idle_4_4.png"};
-char run[6][50] = {"Asset\\Pink_Monster_Run\\tile000.png"};
-char jump_sprite[8][50] = {"Candy-Rush\\Assets\\Pink_Monster_Run\\tile000.png",
-                           "Candy-Rush\\Assets\\Pink_Monster_Run\\tile001.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile002.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile003.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile004.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile005.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile006.png", "Candy-Rush\\Assets\\Pink_Monster_Run\\tile007.png"};
-char hurt[4][50] = {"Assets\\Pink_Monster_Hurt\\tile000.png", "Assets\\Pink_Monster_Hurt\\tile001.png", "Assets\\Pink_Monster_Hurt\\tile002.png", "Assets\\Pink_Monster_Hurt\\tile003.png"};
+char idle[4][80] = {"Candy-Rush/Assets/Pink_Monster_Idle.png/Pink_Monster_Idle_4_1.png",
+                    "Candy-Rush/Assets/Pink_Monster_Idle.png/Pink_Monster_Idle_4_2.png",
+                    "Candy-Rush/Assets/Pink_Monster_Idle.png/ Pink_Monster_Idle_4_3.png",
+               
+                    "Candy-Rush/Assets/Pink_Monster_Idle.png/Pink_Monster_Idle_4_4.png"};
+char run[6][50] = {"Candy-Rush/Asset/Pink_Monster_Run/tile000.png"};
+char jumpSprite[8][50] = {"Candy-Rush/Assets/Pink_Monster_Run/tile000.png",
+                          "Candy-Rush/Assets/Pink_Monster_Run/tile001.png", "Candy-Rush/Assets/Pink_Monster_Run/tile002.png", "Candy-Rush/Assets/Pink_Monster_Run/tile003.png", "Candy-Rush/Assets/Pink_Monster_Run/tile004.png", "Candy-Rush/Assets/Pink_Monster_Run/tile005.png", "Candy-Rush/Assets/Pink_Monster_Run/tile006.png", "Candy-Rush/Assets/Pink_Monster_Run/tile007.png"};
+char hurt[4][50] = {"Candy-Rush/Assets/Pink_Monster_Hurt/tile000.png", "Candy-Rush/Assets/ink_Monster_Hurt/tile001.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile002.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile003.png"};
 
-char attack[1][40] = {"Assets\\Pink_Monster_Attack\\tile000.png"};
-// char enemy[][] = {};
-char enemyRun[8][35] = {"Assests\\Enemy\\EnemyRun000.png", "Assests\\Enemy\\EnemyRun001.png", "Assests\\Enemy\\EnemyRun002.png", "Assests\\Enemy\\EnemyRun003.png", "Assests\\Enemy\\EnemyRun004.png", "Assests\\Enemy\\EnemyRun005.png", "Assests\\Enemy\\EnemyRun006.png", "Assests\\Enemy\\EnemyRun007.png"};
+char attack[1][60] = {"Candy-Rush/Assets/Pink_Monster_Attack/tile000.png"};
+
+char enemyRun[8][50] = {"Candy-Rush/AssestsEnemy/EnemyRun000.png", "Candy-Rush/AssestsEnemy/EnemyRun001.png", "Candy-Rush/AssestsEnemy/EnemyRun002.png", "Candy-Rush/AssestsEnemy/EnemyRun003.png", "Candy-Rush/AssestsEnemy/EnemyRun004.png", "Candy-Rush/AssestsEnemy/EnemyRun005.png", "Candy-Rush/AssestsEnemy/EnemyRun006.png", "Candy-Rush/AssestsEnemy/EnemyRun007.png"};
 
 int enemyRunidx = 0;
 
@@ -63,13 +66,13 @@ int enemyTimeOut = 0;
 
 // char powerUpSound[] = " ";
 
-char frostingSound[60] = "SoundEffect\\coin-collision-sound-342335.mp3";
+char frostingSound[60] = "Candy-Rush/SoundEffect/coin-collision-sound-342335.mp3";
 
 #define MAX_FROSTINGS 3
-int frostingIdx=0;
+int frostingIdx = 0;
 int totalFrostingCollected = 0;
 int frostingTime = 0;
-char frosting[40][35] = {"Frostings//cupcake.png", "Frostings//donut.png", "Frostings//lolipop.png", "Frostings//starCandy.png", "Frostings//sugarCandy.png", "Frostings//toffee.png"};
+char frosting[45][40] = {"Candy-Rush/Frostings/cupcake.png", "Candy-Rush/Frostings/donut.png", "Candy-Rush/Frostings/lolipop.png", "Candy-Rush/Frostings/starCandy.png", "Candy-Rush/Frostings/sugarCandy.png", "Candy-Rush/Frostings/toffee.png"};
 
 struct Frosting
 {
@@ -79,20 +82,20 @@ struct Frosting
 };
 struct Frosting frostings[MAX_FROSTINGS];
 
-char welcomePage[30] = "UI//WelcomeNew.png";
-char menuPage[30] = "UI//MenuNew.png";
-char howToPlay[30] = "UI//HowToPlayNew2.png";
-char musicControl[30] = "UI//MusicControlNew.png";
-char about[20] = "UI//About.png";
-char gameOver[20] = "UI//GameOver.png";
-char purple[30] = "Button//purple.png";
-char tealBlue[30] = "Button//tealBlue.png";
-char pink[30] = "Button//pink.png";
-char gems[30] = "ExtraLabels//Gems.png";
-char heart[30] = "ExtraLabels//heart.png";
-char coin[30] = "ExtraLabels//coin.png";
+char welcomePage[30] = "UI/WelcomeNew.png";
+char menuPage[30] = "UI/MenuNew.png";
+char howToPlay[30] = "UI/HowToPlayNew2.png";
+char musicControl[30] = "UI/MusicControlNew.png";
+char about[20] = "UI/About.png";
+char gameOver[20] = "UI/GameOver.png";
+char purple[30] = "Button/purple.png";
+char tealBlue[30] = "Button/tealBlue.png";
+char pink[30] = "Button/pink.png";
+char gems[30] = "ExtraLabels/Gems.png";
+char heart[30] = "ExtraLabels/heart.png";
+char coin[30] = "ExtraLabels/coin.png";
 
-bool StandPosition = true;
+bool standPosition = true;
 int standCount = 0;
 bool jump = false;
 bool jumpUp = false;
@@ -110,14 +113,13 @@ struct powerUp
     bool active;
 } speedUp, doubleFrostings;
 
-// char cauldron[35]="Accessory\\PowerUps\\cauldron.bmp";
-char magicPotion[40] = "ExtraLabels\\MagicPotion.png";
+char magicPotion[40] = "ExtraLabels/MagicPotion.png";
 
-char doubleFrostingPowerup[50] = "Candy-Rush\\ExtraLabels\\Diamond.png";
-char doubleFrostingEffectPic[50] = "ExtraLabels\\double_coins.png";
+char doubleFrostingPowerup[50] = "Candy-Rush/ExtraLabels/Diamond.png";
+char doubleFrostingEffectPic[50] = "ExtraLabels/double_coins.png";
 
 bool speedUpEffect = false;
-int speedUpEffectActivatorTimer= 0;
+int speedUpEffectActivatorTimer = 0;
 int speedUpEffectDeactivatorTimer = 0;
 
 bool doubleFrostingsEffect = false;
@@ -134,12 +136,12 @@ struct obstacle
 
 } obs1;
 
-struct background
+struct Background
 {
     int x;
     int y;
 };
-struct background bc1[80];
+struct Background bc1[80];
 int bcIndex = 0;
 int idleIdx = 0;
 int runIdx = 0;
@@ -209,9 +211,9 @@ void drawTimer()
 // gameState 2 : Gameover
 // gameState 3 : How to Play
 // gameState 4 : Options
-//gameState 5: About
+// gameState 5: About
 
-char GameOverScene[50] = "UI\\GameOver.png";
+char GameOverScene[50] = "UI/GameOver.png";
 /*char welcomePage[30] = "UI//WelcomeNew.png";
 char menuPage[30] = "UI//MenuNew.png";
 char howToPlay[30] = "UI//HowToPlayNew.png";
@@ -234,16 +236,16 @@ void iMouse(int button, int state, int mx, int my)
     if (gameState == 0) // Menu
     {
         // PLAY BUTTON
-        if (mx >= 553 && mx <=757 && my >= (screenwidth - 220) && my <= (screenwidth - 126))
+        if (mx >= 553 && mx <= 757 && my >= (screenwidth - 220) && my <= (screenwidth - 126))
         {
-            
+
             gameState = 1;
         }
-        
+
         // How to play page
         else if (mx >= 538 && mx <= 776 && my >= (screenwidth - 355) && my <= (screenwidth - 275))
         {
-           
+
             gameState = 3;
         }
         // Options page
@@ -252,16 +254,15 @@ void iMouse(int button, int state, int mx, int my)
             // printf("Options!!\n");
             gameState = 4;
         }
-        else if (mx >= 526 && mx <=790 && my >= (screenwidth - 589) && my <= (screenwidth - 505))
+        else if (mx >= 526 && mx <= 790 && my >= (screenwidth - 589) && my <= (screenwidth - 505))
         {
             // printf("About!!\n");
             gameState = 5;
-
         }
     }
 
     if (gameState == 1) // Game
-    {//play
+    {                   // play
     }
     if (gameState == 2) // Gameover
     {
@@ -286,12 +287,12 @@ void iMouse(int button, int state, int mx, int my)
         }
     }
     // gameState -1: Welcome Page
-// gameState 0 : MenuPage
-// gameState 1 : Actual Game
-// gameState 2 : Gameover
-// gameState 3 : How to Play
-// gameState 4 : Options
-//gameState 5: About
+    // gameState 0 : MenuPage
+    // gameState 1 : Actual Game
+    // gameState 2 : Gameover
+    // gameState 3 : How to Play
+    // gameState 4 : Options
+    // gameState 5: About
 
     if (gameState == 4) // options
     {
@@ -303,12 +304,11 @@ void iMouse(int button, int state, int mx, int my)
         {
             musicOn = false;
         }
-        if (mx >=550 && mx <= 785 && my >= (screenwidth - 596) && my <= (screenwidth - 510))
+        if (mx >= 550 && mx <= 785 && my >= (screenwidth - 596) && my <= (screenwidth - 510))
         {
-            gameState=0;
+            gameState = 0;
         }
     }
-    
 }
 
 /*
@@ -337,11 +337,11 @@ void iKeyboard(unsigned char key)
             gameState = 3; // Correctly update gameState to 3
         }
     }
-   // if (gameState == 2)
-   // {
+    // if (gameState == 2)
+    // {
 
     //    takeInput(key); // Allow input handling in gameState 2
-   // }
+    // }
 }
 
 /*
@@ -366,34 +366,34 @@ void iSpecialKeyboard(unsigned char key)
     }
     if (key == GLUT_KEY_RIGHT)
     {
-        StandPosition = false;
+        standPosition = false;
     }
     else if (key == GLUT_KEY_LEFT)
     {
-        StandPosition = true;
+        standPosition = true;
     }
 }
 void iMouseMove(int mx, int my)
 {
     // place your codes here
-   // printf("Mouse moves in %d,%d", mx, my);
+    // printf("Mouse moves in %d,%d", mx, my);
 }
 void iMouseDrag(int mx, int my)
 {
     // place your codes here
 }
 
-
 void iMouseWheel(int dir, int mx, int my)
 {
     // place your code here
 }
 
-
 void iDraw()
 {
     // place your drawing codes here
     iClear();
+   
+
     if (gameState == -1)
     {
         iShowImage(0, 0, welcomePage);
@@ -407,17 +407,18 @@ void iDraw()
     else if (gameState == 0)
     {
         iShowImage(0, 0, menuPage);
+        
         score = 0;
         totalFrostingCollected = 0;
         second = 0;
-        int collisionNumber = 0;
+        collisionNumber = 0;
         speedUpEffect = false;
         doubleFrostingsEffect = false;
     }
     else if (gameState == 1)
     {
         func_timers();
-        int i, j, k;
+        int i;
         for (i = 0; i < 50; i++)
         {
             iShowImage(bc1[i].x, bc1[i].y, bc[i]);
@@ -442,15 +443,15 @@ void iDraw()
                 runState = true;
                 if (jumpUp)
                 {
-                    iShowImage(X, Y + coordinateJump, jump_sprite[jumpUpIdx]);
+                    iShowImage(X, Y + coordinateJump, jumpSprite[jumpUpIdx]);
                 }
                 else
                 {
-                    iShowImage(X, Y + coordinateJump, jump_sprite[jumpDownIdx]);
+                    iShowImage(X, Y + coordinateJump, jumpSprite[jumpDownIdx]);
                 }
             }
         }
-        else if (char_hurt)
+        else if (charHurt)
         {
 
             iShowImage(X, Y, hurt[hurtIdx]);
@@ -461,7 +462,7 @@ void iDraw()
         }
         else
         {
-            if (!StandPosition || second >= 4)
+            if (!standPosition || second >= 4)
             {
                 if (kill)
                 {
@@ -554,7 +555,7 @@ void iDraw()
     {
         printf(" Score: %d", score);
         GameOver();
-        showChar();
+        // showChar();
     }
     // gameState -1: Welcome Page
     // gameState 0 : MenuPage
@@ -562,6 +563,7 @@ void iDraw()
     // gameState 2 : Gameover
     // gameState 3 : How to Play
     // gameState 4 : Options
+    // gameState 5 : about
 
     // Leaderboard
     /*else if (gameState == 3)
@@ -637,7 +639,7 @@ void func_timers()
     if (doubleFrostingsEffect)
     {
         ++doubleFrostingsEffectActivatorTimer;
-        if (doubleFrostingsEffectActivatorTimer> 200)
+        if (doubleFrostingsEffectActivatorTimer > 200)
         {
             doubleFrostingsEffect = false;
             doubleFrostingsEffectActivatorTimer = 0;
@@ -650,7 +652,7 @@ void func_timers()
     }
 }
 
-/*--------------------Render Background-------------------------*/
+/*--------------------Render Candy-Rush/Background-------------------------*/
 void setAll()
 {
     int sum = 0;
@@ -681,7 +683,7 @@ void jumping()
     {
         if (musicOn)
         {
-            // PlaySound(TEXT("Accessory\\Sound_bites\\Jump_sound.wav"),NULL,SND_FILENAME|SND_ASYNC);
+            // PlaySound(TEXT("Accessory/Sound_bites/Jump_sound.wav"),NULL,SND_FILENAME|SND_ASYNC);
         }
 
         if (jumpUp)
@@ -701,38 +703,36 @@ void jumping()
                 jump = false;
                 coordinateJump = 0;
                 jumpDown = false;
-                StandPosition = false;
+                standPosition = false;
             }
         }
     }
 }
 
 /*-------Static Obstcales Setup and Movement---------*/
-void set_obstacle()
+void setObstacle()
 {
     obs1.obs_x = 1300;
     obs1.obs_y = 75;
     obs1.obs_width = 64;
-    obs1.obs_height = 61 ;
+    obs1.obs_height = 61;
 }
-void generate_obstacle()
+void generateObstacle()
 {
     int x = rand() % 2;
-if (x == 1 && collisionTimeOut > 50)
+    if (x == 1 && collisionTimeOut > 50)
     {
         obs1.active = true;
         collisionTimeOut = 0;
-       
     }
 }
-void move_obstacle()
+void moveObstacle()
 {
     obs1.obs_x -= 30;
     if (obs1.obs_x < 0)
     {
         obs1.active = false;
         obs1.obs_x = 1300;
-       
     }
 }
 void checkCollision()
@@ -747,11 +747,11 @@ void checkCollision()
             ++collisionNumber;
             /*if (musicOn)
             {
-                PlaySound(TEXT("Candy-Rush\\SoundEffect\\playthroughmusic.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.mp3"), NULL, SND_FILENAME | SND_ASYNC);
             }
 */
-            char_hurt = true;
-            if (char_hurt)
+            charHurt = true;
+            if (charHurt)
             {
                 // printf("Initiate hurt anim\n");
             }
@@ -771,14 +771,14 @@ void checkCollision()
 }
 
 /*----------Reaper------------------------*/
-void set_enemy()
+void setEnemy()
 {
     enemy.x = 1300 + 300;
     enemy.y = 75;
     enemy.width = 100;
     enemy.height = 129;
 }
-void generate_enemy()
+void generateEnemy()
 {
     int x = rand() % 2;
     if (x == 1)
@@ -787,14 +787,12 @@ void generate_enemy()
         {
             enemy.active = true;
             enemy.width = 100;
-         enemy.height = 129;
-           enemyDeadTimer= 0;
+            enemy.height = 129;
+            enemyDeadTimer = 0;
         }
-
-      
     }
 }
-void move_enemy()
+void moveEnemy()
 {
     enemy.x -= 30;
     if (enemy.x < 0)
@@ -805,7 +803,7 @@ void move_enemy()
         enemy.height = 129;
     }
 }
-void check_enemy_Collision()
+void checkEnemyCollision()
 {
     if (enemy.active)
     {
@@ -818,10 +816,10 @@ void check_enemy_Collision()
             {
                 enemy.active = false;
                 kill = false;
-               /* if (musicOn)
-                {
-                    PlaySound(TEXT("Candy-Rush\SoundEffect\deadly-strike-352458.mp3"), NULL, SND_FILENAME | SND_ASYNC);
-                }*/
+                /* if (musicOn)
+                 {
+                     PlaySound(TEXT("Candy-Rush\SoundEffect\deadly-strike-352458.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                 }*/
             }
         }
         if ((X < enemy.x + enemy.width && X + playerWidth > enemy.x) && ((Y + coordinateJump) < enemy.y + enemy.height && (Y + coordinateJump) + playerHeight > enemy.y) && !speedUpEffect)
@@ -832,7 +830,7 @@ void check_enemy_Collision()
                 kill = false;
                 if (musicOn)
                 {
-                    PlaySound(TEXT("SoundEffect\\deadly-strike-352458.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                    PlaySound(TEXT("SoundEffect/deadly-strike-352458.mp3"), NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
             else if (second > 10)
@@ -842,10 +840,10 @@ void check_enemy_Collision()
                 ++collisionNumber;
                 if (musicOn)
                 {
-                    PlaySound(TEXT("SoundEffect\\drop-sound-effect-240899.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                    PlaySound(TEXT("SoundEffect/drop-sound-effect-240899.mp3"), NULL, SND_FILENAME | SND_ASYNC);
                 }
-                char_hurt = true;
-                if (char_hurt)
+                charHurt = true;
+                if (charHurt)
                 {
                     // printf("Initiate hurt anim\n");
                 }
@@ -856,7 +854,6 @@ void check_enemy_Collision()
                     gameState = 2;
                     collisionNumber = 0;
                 }
-                
             }
         }
     }
@@ -868,9 +865,9 @@ void SetFrostings()
 {
     for (int i = 0; i < MAX_FROSTINGS; i++)
     {
-       frostings[i].x = screenlength + rand() % 400;
+        frostings[i].x = screenlength + rand() % 400;
         ;
-       frostings[i].y = Y + rand() % 200;
+        frostings[i].y = Y + rand() % 200;
         frostings[i].active = true;
     }
 }
@@ -895,7 +892,7 @@ void checkFrostingCollection()
     {
         if (frostings[i].active)
         {
-            if (X + playerWidth > frostings[i].x && X < frostings[i].x + 30 && Y + (playerHeight + coordinateJump) > frostings[i].y && (Y + coordinateJump) <frostings[i].y + 30)
+            if (X + playerWidth > frostings[i].x && X < frostings[i].x + 30 && Y + (playerHeight + coordinateJump) > frostings[i].y && (Y + coordinateJump) < frostings[i].y + 30)
             {
                 frostings[i].active = false;
                 totalFrostingCollected++;
@@ -903,10 +900,10 @@ void checkFrostingCollection()
                 {
                     totalFrostingCollected++;
                 }
-             //   if (musicOn & !importantSoundsOn)
-             //   {
-              //      PlaySound(TEXT("SoundEffect\\coin-collision-sound-342335.mp3"), NULL, SND_FILENAME | SND_ASYNC);
-              //  }
+                //   if (musicOn & !importantSoundsOn)
+                //   {
+                //      PlaySound(TEXT("SoundEffect/coin-collision-sound-342335.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                //  }
                 // printf("Coin collected at (%d, %d)! Total: %d\n", coins[i].x, coins[i].y, totalCoinsCollected);
             }
         }
@@ -928,7 +925,7 @@ void rosteringFrostings()
         if (!frostings[i].active)
         {
             frostings[i].x = rand() % screenlength + X + 10;
-           frostings[i].y = Y + rand() % 200;
+            frostings[i].y = Y + rand() % 200;
             frostings[i].active = true;
         }
     }
@@ -973,25 +970,25 @@ void rosteringSpeedUpPower()
 
 void moveSpeedUpPower()
 {
-    speedUp.x-=50;
-    if(speedUp.x<0)
+    speedUp.x -= 50;
+    if (speedUp.x < 0)
     {
         speedUp.active = false;
-        speedUp.x = 1300+ 1000;
+        speedUp.x = 1300 + 1000;
     }
 }
-void gainSpeedUpower()
+void gainSpeedUpPower()
 {
-    if((X <speedUp.x + speedUp.width && X+playerWidth>speedUp.x) && ((Y+coordinateJump)<speedUp.y+speedUp.height && (Y+coordinateJump)+playerHeight>speedUp.y))
+    if ((X < speedUp.x + speedUp.width && X + playerWidth > speedUp.x) && ((Y + coordinateJump) < speedUp.y + speedUp.height && (Y + coordinateJump) + playerHeight > speedUp.y))
 
-     {  // printf("I am immune!\n");
+    { // printf("I am immune!\n");
         speedUp.active = false;
         speedUpEffect = true;
 
         if (musicOn)
         {
             importantSoundsOn = true;
-          //  PlaySound(TEXT("Accessory\\Sound_bites\\Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            //  PlaySound(TEXT("Accessory/Sound_bites/Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
         }
         importantSoundsOn = false;
     }
@@ -1029,7 +1026,7 @@ void moveDoubleFrostingPower()
         doubleFrostings.x = 1300 + 1000;
     }
 }
-void GainDoubleFrostingPower()
+void gainDoubleFrostingPower()
 {
     if ((X < doubleFrostings.x + doubleFrostings.width && X + playerWidth > doubleFrostings.x) && ((Y + coordinateJump) < doubleFrostings.y + doubleFrostings.height && (Y + coordinateJump) + playerHeight > doubleFrostings.y))
     {
@@ -1040,10 +1037,10 @@ void GainDoubleFrostingPower()
 
         if (musicOn)
         {
-            importantSoundsOn= true;
-           // PlaySound(TEXT("Accessory\\Sound_bites\\Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            importantSoundsOn = true;
+            // PlaySound(TEXT("Accessory/Sound_bites/Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
         }
-       importantSoundsOn= false;
+        importantSoundsOn = false;
     }
 }
 
@@ -1148,16 +1145,16 @@ void newHighscore()
             }
         }
     }
-}
-
+}*/
+char str1[100];
 void showChar()
 {
     iSetColor(0, 0, 0);
     // iText(400,500,"Enter your Name: ",GLUT_BITMAP_HELVETICA_18);
     // iRectangle(495,450,160,30);
-    iText(screenlength / 2 - 100 + 50, 460, str1, GLUT_BITMAP_HELVETICA_18);
+    iText(screenlength / 2 - 100 + 50, 460, str1, GLUT_BITMAP_HELVETICA_10);
 }
-
+/*
 void takeInput(unsigned char key)
 {
     if (key == '\b')
@@ -1193,16 +1190,11 @@ void resetNameInput()
     (mx, my) is the position where the mouse pointer is.
     */
 
-
-
-
-        
-      
-void char_animations()
+void charAnimations()
 {
 
     idleIdx++;
-    if (idleIdx >= 6)
+    if (idleIdx >= 4)
         idleIdx = 0;
 
     runIdx++;
@@ -1224,80 +1216,84 @@ void char_animations()
     /*-----------Reaper-----------*/
     enemyRunidx++;
     if (enemyRunidx >= 7)
-       enemyRunidx = 0;
+        enemyRunidx = 0;
 }
 
 // Hurt_anim_ for character!!!
-void hurt_anim()
+void hurtAnim()
 {
-    if (char_hurt)
+    if (charHurt)
     {
         hurtIdx++;
         if (hurtIdx >= 3)
         {
             hurtIdx = 0;
-            char_hurt = false;
+            charHurt = false;
         }
     }
 }
 
-void coin_anim()
+void coinAnim()
 {
     frostingIdx++;
-    if ( frostingIdx >= 8)
+    if (frostingIdx >= 8)
         frostingIdx = 0;
 }
-void generate_barriers()
+void generateBarriers()
 {
-    generate_obstacle();
-    generate_enemy();
-    char_animations();
+    generateObstacle();
+    generateEnemy();
+    charAnimations();
 }
-void generate_powerup()
+void generatePowerup()
 {
     rosteringSpeedUpPower(); // respawn them
     rosteringDoubleFrostingPower();
 }
 void allfrosting()
 {
-    coin_anim();
+    coinAnim();
     moveFrostings();
     rosteringFrostings();
 }
-void move_powerups()
+void movePowerups()
 {
 
-   moveSpeedUpPower();
+    moveSpeedUpPower();
     moveDoubleFrostingPower();
 }
 
-int main()
-{
+int main(int argc, char** argv)
+{ glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+     iInitialize(screenlength, screenwidth, "Candy-Rush");
     srand(time(0));
     setAll();
-    set_obstacle();
-    set_enemy();
+    setObstacle();
+    setEnemy();
 
     // Powerups setup
     setSpeedUpPower();
+    SetFrostings();
     setDoubleFrostingPower();
-
-    iSetTimer(100, generate_barriers);
-    iSetTimer(300, generate_powerup);
-    iSetTimer(100, move_powerups); // call them in int main
-    iSetTimer(500, hurt_anim);
+   
+   
+    
+    iSetTimer(100, generateBarriers);
+    iSetTimer(300, generatePowerup);
+    iSetTimer(100, movePowerups); // call them in int main
+    iSetTimer(500, hurtAnim);
     iSetTimer(100, change);
 
-    iSetTimer((100), move_enemy);
+    iSetTimer((100), moveEnemy);
 
     iSetTimer(1000, changeTimer);
 
     iSetTimer(5, jumping);
 
     // Coins
-    SetFrostings();
+
     iSetTimer(100, allfrosting);
 
-    iInitialize(screenlength, screenwidth, "Candy-Rush");
     return 0;
 }

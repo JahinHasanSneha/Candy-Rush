@@ -416,7 +416,7 @@ void iDraw()
     {
         func_timers();
         int i;
-        for (i = 0; i < 29; i++)
+        for (i = 0; i < 50; i++)
         {
             iShowImage(bc1[i].x, bc1[i].y, bc[i]);
         }

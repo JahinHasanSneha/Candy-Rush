@@ -42,7 +42,7 @@ char jumpSprite[8][50] = {"Candy-Rush/Assets/Pink_Monster_Jump/tile000.png",
                           "Candy-Rush/Assets/Pink_Monster_Jump/tile001.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile002.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile003.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile004.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile005.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile006.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile007.png"};
 char hurt[4][50] = {"Candy-Rush/Assets/Pink_Monster_Hurt/tile000.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile001.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile002.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile003.png"};
 
-char attack[1][60] = {"Candy-Rush/Assets/Pink_Monster_Attack/tile000.png"};
+char attack[4][60] = {"Candy-Rush/Assets/Pink_Monster_Attack/tile000.png","Candy-Rush/Assets/Pink_Monster_Attack/tile001.png","Candy-Rush/Assets/Pink_Monster_Attack/tile002.png","Candy-Rush/Assets/Pink_Monster_Attack/tile003.png"};
 
 char enemyRun[8][50] = {"Candy-Rush/Assests/Enemy/EnemyRun000.png", "Candy-Rush/Assests/Enemy/EnemyRun001.png", "Candy-Rush/Assests/Enemy/EnemyRun002.png", "Candy-Rush/Assests/Enemy/EnemyRun003.png", "Candy-Rush/Assests/Enemy/EnemyRun004.png", "Candy-Rush/Assests/Enemy/EnemyRun005.png", "Candy-Rush/Assests/Enemy/EnemyRun006.png", "Candy-Rush/Assests/Enemy/EnemyRun007.png"};
 
@@ -91,13 +91,14 @@ char pink[50] = "Candy-Rush/Button/pink.png";
 char gems[50] = "Candy-Rush/ExtraLabels/Gems.png";
 char heart[50] = "Candy-Rush/ExtraLabels/heart.png";
 char coin[50] = "Candy-Rush/ExtraLabels/coin.png";
-
+char obs[50]="Candy-Rush/Frostings/Obstacle.png";
+char obsIce[50]="Candy-Rush/Frostings/ObstacleIce.png";
 bool standPosition = true;
 int standCount = 0;
 bool jump = false;
 bool jumpUp = false;
 bool jumpDown = false;
-int jumpLimit = 130;
+int jumpLimit = 100;
 int coordinateJump = 0;
 bool kill = false;
 int killTimer = 0;
@@ -132,7 +133,15 @@ struct obstacle
     bool active;
 
 } obs1;
+struct obstacle1
+{
+    int obs_x;
+    int obs_y;
+    int obs_width;
+    int obs_height;
+    bool active;
 
+} obs2;
 struct Background
 {
     int x;
@@ -144,7 +153,7 @@ int bcIndex = 0;
 int idleIdx = 0;
 int runIdx = 0;
 int jumpUpIdx = 0;
-int jumpDownIdx = 7;
+int jumpDownIdx = 5;
 int hurtIdx = 0;
 int attackIdx = 0;
 
@@ -252,7 +261,7 @@ void iMouse(int button, int state, int mx, int my)
             // printf("Options!!\n");
             gameState = 4;
         }
-        else if (mx >= 526 && mx <= 790 && my >= (screenwidth - 604) && my <= (screenwidth - 505))
+        else if (mx >= 526 && mx <= 790 && my >= (screenwidth - 630) && my <= (screenwidth - 505))
         {
             // printf("About!!\n");
             gameState = 5;
@@ -426,7 +435,7 @@ void iDraw()
         }
         if (doubleFrostingsEffect)
         {
-            iShowImage(1200, screenwidth - 120, "Candy-Rush/ExtraLabels/double_coins.png");
+            iShowImage(1150, screenwidth - 150, "Candy-Rush/ExtraLabels/double_coins.png");
         }
         // iText(1163, 704, "Score: ", GLUT_BITMAP_HELVETICA_18);
         if (jump)
@@ -490,10 +499,21 @@ void iDraw()
             {
                 iShowImage(enemy.x, enemy.y, enemyRun[enemyRunidx]);
             }
-            /*if (obs1.active)
+            if (obs1.active)
             {
-                iShowImage(obs1.obs_x, obs1.obs_y, enemySprite[0]);
-            }*/
+                iShowImage(obs1.obs_x, obs1.obs_y, "Candy-Rush/Frostings/Obstacle.png");
+            }
+        }
+        if (enemy.x != obs2.obs_x)
+        {
+            if (enemy.active)
+            {
+                iShowImage(enemy.x, enemy.y, enemyRun[enemyRunidx]);
+            }
+            if (obs2.active)
+            {
+                iShowImage(obs2.obs_x, obs2.obs_y, "Candy-Rush/Frostings/ObstacleIce.png");
+            }
         }
 
         if (speedUp.active)
@@ -552,6 +572,9 @@ void iDraw()
     else if (gameState == 2)
     {
         printf(" Score: %d", score);
+        iSetColor(255, 255, 255);
+        sprintf(point, "Score: %d", score);
+        iText(1038, screenwidth - 80, point, GLUT_BITMAP_HELVETICA_18);
 
         GameOver();
         showChar();
@@ -654,6 +677,10 @@ void func_timers()
     {
         ++collisionTimeOut;
     }
+    if (!obs2.active)
+    {
+        ++collisionTimeOut;
+    }
 }
 
 /*--------------------Render Candy-Rush/Background-------------------------*/
@@ -703,7 +730,7 @@ void change()
 
          if (jumpUp)
          {
-             coordinateJump += 10;
+             coordinateJump += 7;
              if (coordinateJump >= jumpLimit)
              {
                  jumpUp = false;
@@ -712,7 +739,7 @@ void change()
          else
          {
              jumpDown = true;
-             coordinateJump -= 10;
+             coordinateJump -= 7;
              if (coordinateJump < 0)
              {
                  jump = false;
@@ -728,9 +755,13 @@ void change()
  void setObstacle()
  {
      obs1.obs_x = 1300;
-     obs1.obs_y = 75;
+     obs1.obs_y = 135;
      obs1.obs_width = 64;
      obs1.obs_height = 61;
+     obs2.obs_x = 1300;
+     obs2.obs_y = 135;
+     obs2.obs_width = 64;
+     obs2.obs_height = 61;
  }
  void generateObstacle()
  {
@@ -738,6 +769,11 @@ void change()
      if (x == 1 && collisionTimeOut > 50)
      {
          obs1.active = true;
+         collisionTimeOut = 0;
+     }
+     if (x == 1 && collisionTimeOut > 100)
+     {
+         obs2.active = true;
          collisionTimeOut = 0;
      }
  }
@@ -748,6 +784,12 @@ void change()
      {
          obs1.active = false;
          obs1.obs_x = 1300;
+     }
+      obs2.obs_x -= 30;
+     if (obs2.obs_x < 0)
+     {
+         obs2.active = false;
+         obs2.obs_x = 1300;
      }
  }
  void checkCollision()
@@ -783,13 +825,46 @@ void change()
          }
      }
      // generate_obstacle();
+     
+     if (obs2.active && second > 10)
+     {
+         // printf("Entered checkCollsion\n");
+         if ((X < obs2.obs_x + obs2.obs_width && X + playerWidth > obs2.obs_x) && ((Y + coordinateJump) < obs2.obs_y + obs2.obs_height && (Y + coordinateJump) + playerHeight > obs2.obs_y) && !speedUpEffect)
+         {
+             // printf("Collision detected!\n");
+             obs2.active = false;
+             ++collisionNumber;
+             /*if (musicOn)
+             {
+                 PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+             }
+ */
+             charHurt = true;
+             if (charHurt)
+             {
+                 // printf("Initiate hurt anim\n");
+             }
+             // printf("Collision no: %d\n",collision_number);
+             // gameState = 0;
+             if (collisionNumber > 3)
+             {
+                 gameState = 2;
+                 collisionNumber = 0;
+                 // score=0;
+                 // second=0;
+             }
+             // printf("Collision detected!\n");
+         }
+     }
+     // generate_obstacle();
+   
  }
 
  /*----------Reaper------------------------*/
  void setEnemy()
  {
-     enemy.x = 1300 + 300;
-     enemy.y = 75;
+     enemy.x = 1300 + 150;
+     enemy.y = 107;
      enemy.width = 100;
      enemy.height = 129;
  }
@@ -813,7 +888,7 @@ void change()
      if (enemy.x < 0)
      {
          enemy.active = false;
-         enemy.x = 1300 + 300;
+         enemy.x = 1300 + 150;
          enemy.width = 100;
          enemy.height = 129;
      }
@@ -880,7 +955,7 @@ void change()
  {
      for (int i = 0; i < MAX_FROSTINGS; i++)
      {
-         frostings[i].x = screenlength + rand() % 400;
+         frostings[i].x = screenlength + rand() % 300;
          ;
          frostings[i].y = Y + rand() % 200;
          frostings[i].active = true;
@@ -1217,16 +1292,16 @@ void change()
          runIdx = 0;
 
      jumpUpIdx++;
-     if (jumpUpIdx >= 8)
-         jumpUpIdx = 5;
+     if (jumpUpIdx >= 5)
+         jumpUpIdx = 4;
 
      jumpDownIdx++;
-     if (jumpDownIdx >= 11)
-         jumpDownIdx = 10;
+     if (jumpDownIdx >= 8)
+         jumpDownIdx = 7;
 
      attackIdx++;
-     if (attackIdx >= 10)
-         attackIdx = 0;
+     if (attackIdx >= 3)
+       attackIdx = 0;
 
      /*-----------Reaper-----------*/
      enemyRunidx++;
@@ -1251,7 +1326,7 @@ void change()
  void coinAnim()
  {
      frostingIdx++;
-     if (frostingIdx >= 8)
+     if (frostingIdx >=7)
          frostingIdx = 0;
  }
  void generateBarriers()
@@ -1313,6 +1388,3 @@ void change()
 
      return 0;
  }
-     
-  
-          

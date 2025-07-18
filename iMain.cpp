@@ -166,22 +166,23 @@ char powerUpSound[60] = "Candy-Rush/SoundEffect/powerUp.wav";
 
 char frostingSound[60] = "Candy-Rush/SoundEffect/coin-collision-sound-342335.wav";
 
-#define MAX_FROSTINGS 3
+#define MAX_FROSTINGS 6
 int frostingIdx = 0;
 int totalFrostingCollected = 0;
 int frostingTime = 0;
-char frosting[45][40] = {"Candy-Rush/Frostings/cupcake.png", "Candy-Rush/Frostings/donut.png", "Candy-Rush/Frostings/lolipop.png", "Candy-Rush/Frostings/starCandy.png", "Candy-Rush/Frostings/sugarCandy.png", "Candy-Rush/Frostings/toffee.png"};
+char frosting[45][40] = {"Candy-Rush/Frostings/cupcake.png", "Candy-Rush/Frostings/donut.png",  "Candy-Rush/Frostings/starCandy.png", "Candy-Rush/Frostings/sugarCandy.png", "Candy-Rush/Frostings/toffee.png","Candy-Rush/Frostings/lolipop.png"};
 
 struct Frosting
 {
     int x;
     int y;
     bool active;
+    int type;
 };
 struct Frosting frostings[MAX_FROSTINGS];
 
 char welcomePage[30] = "Candy-Rush/UI/WelcomeNew.png";
-char menuPage[30] = "Candy-Rush/UI/MenuNew.png";
+char menuPage[30] = "Candy-Rush/UI/MenuNew2.png";
 char howToPlay[50] = "Candy-Rush/UI/HowToPlayNew2.png";
 char musicControl[50] = "Candy-Rush/UI/MusicControlNew.png";
 char about[50] = "Candy-Rush/UI/About.png";
@@ -513,6 +514,12 @@ void iKeyboard(unsigned char key)
     if (key == 'k' || key == 'K')
     {
         kill = true;
+         if (musicOn)
+         {
+             importantSoundsOn = true;
+             PlaySound(TEXT("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav"), NULL, SND_FILENAME | SND_ASYNC);
+         }
+         importantSoundsOn = false;
         // printf("I am ready to kill\n");
     }
     if (gameState == 0)
@@ -541,20 +548,9 @@ void iKeyboard(unsigned char key)
 int bgSoundIdx = -1; //
 void iSpecialKeyboard(unsigned char key)
 {
-    switch (key)
-    {
-    case GLUT_KEY_UP:
-        iIncreaseVolume(bgSoundIdx, 5);
-        break;
-    case GLUT_KEY_DOWN:
-        iDecreaseVolume(bgSoundIdx, 5);
-        break;
-        // place your codes for other keys here
-    default:
-        break;
-    }
+    
     // place your codes for other keys here
-    /* if (key == GLUT_KEY_UP)
+    if (key == GLUT_KEY_UP)
      {
          gameState = 1;
      }
@@ -569,7 +565,7 @@ void iSpecialKeyboard(unsigned char key)
      else if (key == GLUT_KEY_LEFT)
      {
          standPosition = true;
-     }*/
+     }
 }
 void iMouseMove(int mx, int my)
 {
@@ -615,7 +611,7 @@ void iDraw()
             PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.wav"), NULL, SND_FILENAME | SND_ASYNC);
         }
         importantSoundsOn = false;*/
-        iShowImage(0, 0, "Candy-Rush/UI/MenuNew.png");
+        iShowImage(0, 0,"Candy-Rush/UI/MenuNew2.png");
 
         score = 0;
         totalFrostingCollected = 0;
@@ -639,7 +635,7 @@ void iDraw()
         }*/
         if (speedUpEffect)
         {
-            iShowImage(X - 58, Y + coordinateJump, "Candy-Rush/ExtraLabels/MagicPotionEffect.png");
+            iShowImage(X - 58, Y + coordinateJump, "Candy-Rush/ExtraLabels/Adobe Express - file (40).png");
         }
         if (doubleFrostingsEffect)
         {
@@ -1063,7 +1059,7 @@ void change()
                  kill = false;
                  if (musicOn)
                  {
-                     PlaySound(TEXT("Candy-Rush/SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                     PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
                  }
              }
          }
@@ -1113,6 +1109,7 @@ void change()
          frostings[i].x = screenlength + rand() % 300;
          ;
          frostings[i].y = Y + rand() % 200;
+         frostings[i].type=i%3;
          frostings[i].active = true;
      }
  }
@@ -1181,7 +1178,7 @@ void change()
      {
          if (frostings[i].active)
          {
-             iShowImage(frostings[i].x, frostings[i].y, frosting[frostingIdx]);
+             iShowImage(frostings[i].x, frostings[i].y, frosting[frostings[i].type]);
          }
      }
  }

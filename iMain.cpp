@@ -3,35 +3,135 @@
 #include <time.h>
 #include <stdlib.h>
 #include <direct.h>
+#include "iSound.h"
 
 #define screenwidth 731
 #define screenlength 1300
 
+int collisionNumber = 0;
+bool charHurt = false;
+bool importantSoundsOn = false;
 bool runState = false;
 int gameState = -1;
 int loading = 0;
 bool musicOn = true;
-int collisionNumber = 0;
-bool charHurt = false;
-bool importantSoundsOn = false;
 
+int playerWidth = 88, playerHeight = 140;
 int X = 350;
 int Y = 135;
-int playerWidth = 88, playerHeight = 107;
+Image bg;
+int speed = -20;
+void loadResources()
+{
+	iLoadImage(&bg, "Candy-Rush/Background/BackGround.png");
+	
+}
 
-char bc[50][51] = {"Candy-Rush/Background/tile000.png", "Candy-Rush/Background/tile001.png", "Candy-Rush/Background/tile002.png", "Candy-Rush/Background/tile003.png", "Candy-Rush/Background/tile004.png",
-                   "Candy-Rush/Background/tile005.png", "Candy-Rush/Background/tile006.png", "Candy-Rush/Background/tile007.png", "Candy-Rush/Background/tile008.png", "Candy-Rush/Background/tile009.png",
-                   "Candy-Rush/Background/tile010.png", "Candy-Rush/Background/tile011.png", "Candy-Rush/Background/tile012.png", "Candy-Rush/Background/tile013.png", "Candy-Rush/Background/tile014.png",
-                   "Candy-Rush/Background/tile015.png", "Candy-Rush/Background/tile016.png", "Candy-Rush/Background/tile017.png", "Candy-Rush/Background/tile018.png", "Candy-Rush/Background/tile019.png",
-                   "Candy-Rush/Background/tile020.png", "Candy-Rush/Background/tile021.png", "Candy-Rush/Background/tile022.png", "Candy-Rush/Background/tile023.png", "Candy-Rush/Background/tile024.png",
-                   "Candy-Rush/Background/tile025.png", "Candy-Rush/Background/tile026.png", "Candy-Rush/Background/tile027.png", "Candy-Rush/Background/tile028.png", "Candy-Rush/Background/tile029.png",
-                   "Candy-Rush/Background/tile030.png", "Candy-Rush/Background/tile031.png", "Candy-Rush/Background/tile032.png", "Candy-Rush/Background/tile033.png", "Candy-Rush/Background/tile034.png",
-                   "Candy-Rush/Background/tile035.png", "Candy-Rush/Background/tile036.png", "Candy-Rush/Background/tile037.png", "Candy-Rush/Background/tile038.png", "Candy-Rush/Background/tile039.png",
-                   "Candy-Rush/Background/tile040.png", "Candy-Rush/Background/tile041.png", "Candy-Rush/Background/tile042.png", "Candy-Rush/Background/tile043.png", "Candy-Rush/Background/tile044.png",
-                   "Candy-Rush/Background/tile045.png", "Candy-Rush/Background/tile046.png", "Candy-Rush/Background/tile047.png", "Candy-Rush/Background/tile048.png", "Candy-Rush/Background/tile049.png",
-                 };
+char bc[50][51] = {
+    "Candy-Rush/Background/tile000.png",
+    "Candy-Rush/Background/tile001.png",
+    "Candy-Rush/Background/tile002.png",
+    "Candy-Rush/Background/tile003.png",
+    "Candy-Rush/Background/tile004.png",
+    "Candy-Rush/Background/tile005.png",
+    "Candy-Rush/Background/tile006.png",
+    "Candy-Rush/Background/tile007.png",
+    "Candy-Rush/Background/tile008.png",
+    "Candy-Rush/Background/tile009.png",
+    "Candy-Rush/Background/tile010.png",
+    "Candy-Rush/Background/tile011.png",
+    "Candy-Rush/Background/tile012.png",
+    "Candy-Rush/Background/tile013.png",
+    "Candy-Rush/Background/tile014.png",
+    "Candy-Rush/Background/tile015.png",
+    "Candy-Rush/Background/tile016.png",
+    "Candy-Rush/Background/tile017.png",
+    "Candy-Rush/Background/tile018.png",
+    "Candy-Rush/Background/tile019.png",
+    "Candy-Rush/Background/tile020.png",
+    "Candy-Rush/Background/tile021.png",
+    "Candy-Rush/Background/tile022.png",
+    "Candy-Rush/Background/tile023.png",
+    "Candy-Rush/Background/tile024.png",
+    "Candy-Rush/Background/tile025.png",
+    "Candy-Rush/Background/tile026.png",
+    "Candy-Rush/Background/tile027.png",
+    "Candy-Rush/Background/tile028.png",
+    "Candy-Rush/Background/tile029.png",
+    "Candy-Rush/Background/tile030.png",
+    "Candy-Rush/Background/tile031.png",
+    "Candy-Rush/Background/tile032.png",
+    "Candy-Rush/Background/tile033.png",
+    "Candy-Rush/Background/tile034.png",
+    "Candy-Rush/Background/tile035.png",
+    "Candy-Rush/Background/tile036.png",
+    "Candy-Rush/Background/tile037.png",
+    "Candy-Rush/Background/tile038.png",
+    "Candy-Rush/Background/tile039.png",
+    "Candy-Rush/Background/tile040.png",
+    "Candy-Rush/Background/tile041.png",
+    "Candy-Rush/Background/tile042.png",
+    "Candy-Rush/Background/tile043.png",
+    "Candy-Rush/Background/tile044.png",
+    "Candy-Rush/Background/tile045.png",
+    "Candy-Rush/Background/tile046.png",
+    "Candy-Rush/Background/tile047.png",
+    "Candy-Rush/Background/tile048.png",
+    "Candy-Rush/Background/tile049.png",
+};
 
-char back[29][50] = {"Candy-Rush/imagy-splitted-images/image1x1.png", "Candy-Rush/imagy-splitted-images/image2x1.png", "Candy-Rush/imagy-splitted-images/image3x1.png", "Candy-Rush/imagy-splitted-images/image4x1.png", "Candy-Rush/imagy-splitted-images/image5x1.png", "Candy-Rush/imagy-splitted-images/image6x1.png", "Candy-Rush/imagy-splitted-images/image7x1.png", "Candy-Rush/imagy-splitted-images/image8x1.png", "Candy-Rush/imagy-splitted-images/image9x1.png", "Candy-Rush/imagy-splitted-images/image10x1.png", "Candy-Rush/imagy-splitted-images/image11x1.png", "Candy-Rush/imagy-splitted-images/image12x1.png", "Candy-Rush/imagy-splitted-images/image13x1.png", "Candy-Rush/imagy-splitted-images/image14x1.png", "Candy-Rush/imagy-splitted-images/image15x1.png", "Candy-Rush/imagy-splitted-images/image16x1.png", "Candy-Rush/imagy-splitted-images/image17x1.png", "Candy-Rush/imagy-splitted-images/image18x1.png", "Candy-Rush/imagy-splitted-images/image19x1.png", "Candy-Rush/imagy-splitted-images/image20x1.png", "Candy-Rush/imagy-splitted-images/image21x1.png", "Candy-Rush/imagy-splitted-images/image22x1.png", "Candy-Rush/imagy-splitted-images/image23x1.png", "Candy-Rush/imagy-splitted-images/image24x1.png", "Candy-Rush/imagy-splitted-images/image25x1.png", "Candy-Rush/imagy-splitted-images/image26x1.png", "Candy-Rush/imagy-splitted-images/image27x1.png", "Candy-Rush/imagy-splitted-images/image28x1.png", "Candy-Rush/imagy-splitted-images/image29x1.png"};
+char back[50][50] = {
+    "Candy-Rush/Background/00.png",
+    "Candy-Rush/Background/10.png",
+    "Candy-Rush/Background/20.png",
+    "Candy-Rush/Background/30.png",
+    "Candy-Rush/Background/40.png",
+    "Candy-Rush/Background/50.png",
+    "Candy-Rush/Background/60.png",
+    "Candy-Rush/Background/70.png",
+    "Candy-Rush/Background/80.png",
+    "Candy-Rush/Background/90.png",
+    "Candy-Rush/Background/100.png",
+    "Candy-Rush/Background/110.png",
+    "Candy-Rush/Background/120.png",
+    "Candy-Rush/Background/130.png",
+    "Candy-Rush/Background/140.png",
+    "Candy-Rush/Background/150.png",
+    "Candy-Rush/Background/160.png",
+    "Candy-Rush/Background/170.png",
+    "Candy-Rush/Background/180.png",
+    "Candy-Rush/Background/190.png",
+    "Candy-Rush/Background/200.png",
+    "Candy-Rush/Background/210.png",
+    "Candy-Rush/Background/220.png",
+    "Candy-Rush/Background/230.png",
+    "Candy-Rush/Background/240.png",
+    "Candy-Rush/Background/250.png",
+    "Candy-Rush/Background/260.png",
+    "Candy-Rush/Background/270.png",
+    "Candy-Rush/Background/280.png",
+    "Candy-Rush/Background/290.png",
+    "Candy-Rush/Background/300.png",
+    "Candy-Rush/Background/310.png",
+    "Candy-Rush/Background/320.png",
+    "Candy-Rush/Background/330.png",
+    "Candy-Rush/Background/340.png",
+    "Candy-Rush/Background/350.png",
+    "Candy-Rush/Background/360.png",
+    "Candy-Rush/Background/370.png",
+    "Candy-Rush/Background/380.png",
+    "Candy-Rush/Background/390.png",
+    "Candy-Rush/Background/400.png",
+    "Candy-Rush/Background/410.png",
+    "Candy-Rush/Background/420.png",
+    "Candy-Rush/Background/430.png",
+    "Candy-Rush/Background/440.png",
+    "Candy-Rush/Background/450.png",
+    "Candy-Rush/Background/460.png",
+    "Candy-Rush/Background/470.png",
+    "Candy-Rush/Background/480.png",
+    "Candy-Rush/Background/490.png",
+};
 
 char idle[4][80] = {"Candy-Rush/Assets/Pink_Monster_Idle.png/tile000.png",
                     "Candy-Rush/Assets/Pink_Monster_Idle.png/tile001.png",
@@ -42,7 +142,7 @@ char jumpSprite[8][50] = {"Candy-Rush/Assets/Pink_Monster_Jump/tile000.png",
                           "Candy-Rush/Assets/Pink_Monster_Jump/tile001.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile002.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile003.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile004.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile005.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile006.png", "Candy-Rush/Assets/Pink_Monster_Jump/tile007.png"};
 char hurt[4][50] = {"Candy-Rush/Assets/Pink_Monster_Hurt/tile000.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile001.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile002.png", "Candy-Rush/Assets/Pink_Monster_Hurt/tile003.png"};
 
-char attack[4][60] = {"Candy-Rush/Assets/Pink_Monster_Attack/tile000.png","Candy-Rush/Assets/Pink_Monster_Attack/tile001.png","Candy-Rush/Assets/Pink_Monster_Attack/tile002.png","Candy-Rush/Assets/Pink_Monster_Attack/tile003.png"};
+char attack[4][60] = {"Candy-Rush/Assets/Pink_Monster_Attack/tile000.png", "Candy-Rush/Assets/Pink_Monster_Attack/tile001.png", "Candy-Rush/Assets/Pink_Monster_Attack/tile002.png", "Candy-Rush/Assets/Pink_Monster_Attack/tile003.png"};
 
 char enemyRun[8][50] = {"Candy-Rush/Assests/Enemy/EnemyRun000.png", "Candy-Rush/Assests/Enemy/EnemyRun001.png", "Candy-Rush/Assests/Enemy/EnemyRun002.png", "Candy-Rush/Assests/Enemy/EnemyRun003.png", "Candy-Rush/Assests/Enemy/EnemyRun004.png", "Candy-Rush/Assests/Enemy/EnemyRun005.png", "Candy-Rush/Assests/Enemy/EnemyRun006.png", "Candy-Rush/Assests/Enemy/EnemyRun007.png"};
 
@@ -61,7 +161,8 @@ int enemyDeadTimer = 0;
 int collisionTimeOut = 0;
 int enemyTimeOut = 0;
 
-// char powerUpSound[] = " ";
+char powerUpSound[60] = "Candy-Rush/SoundEffect/powerUp.wav";
+// char click[70]=""Candy-Rush/SoundEffect/click.wav";
 
 char frostingSound[60] = "Candy-Rush/SoundEffect/coin-collision-sound-342335.wav";
 
@@ -91,8 +192,8 @@ char pink[50] = "Candy-Rush/Button/pink.png";
 char gems[50] = "Candy-Rush/ExtraLabels/Gems.png";
 char heart[50] = "Candy-Rush/ExtraLabels/heart.png";
 char coin[50] = "Candy-Rush/ExtraLabels/coin.png";
-char obs[50]="Candy-Rush/Frostings/Obstacle.png";
-char obsIce[50]="Candy-Rush/Frostings/ObstacleIce.png";
+char obs[50] = "Candy-Rush/Frostings/Obstacle.png";
+char obsIce[50] = "Candy-Rush/Frostings/ObstacleIce.png";
 bool standPosition = true;
 int standCount = 0;
 bool jump = false;
@@ -148,7 +249,7 @@ struct Background
     int y;
 };
 struct Background bc1[50];
-struct Background back1[29];
+struct Background back1[50];
 int bcIndex = 0;
 int idleIdx = 0;
 int runIdx = 0;
@@ -180,7 +281,7 @@ void readScore();
 void showChar();
 
 void func_timers();
-
+// char click[60]=""Candy-Rush/SoundEffect/click.wav";
 char sec[10000];
 int minute = 0;
 int hour = 0;
@@ -219,6 +320,7 @@ void drawTimer()
 // gameState 3 : How to Play
 // gameState 4 : Options
 // gameState 5: About
+// gameState 6:Leaderboard
 
 char GameOverScene[50] = "UI/GameOver.png";
 /*char welcomePage[30] = "UI//WelcomeNew.png";
@@ -234,6 +336,12 @@ void GameOver()
     iSetColor(128, 128, 128);
     iFilledRectangle(0, 0, screenwidth, screenlength);
     iShowImage(0, 0, "Candy-Rush/UI/GameOver.png");
+   /* if (musicOn)
+    {
+        importantSoundsOn = true;
+        iPlaySound("Candy-Rush/SoundEffect/clock-ticking-sound-effect-240503.wav", true, 50);
+    }
+    importantSoundsOn = false;*/
     gameState = 2;
 }
 void iMouse(int button, int state, int mx, int my)
@@ -243,26 +351,59 @@ void iMouse(int button, int state, int mx, int my)
     if (gameState == 0) // Menu
     {
         // PLAY BUTTON
-        if (mx >= 553 && mx <= 757 && my >= (screenwidth - 220) && my <= (screenwidth - 126))
+        if (mx >= 550 && mx <= 751 && my >= (screenwidth - 176) && my <= (screenwidth - 90))
         {
-
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             gameState = 1;
         }
 
         // How to play page
-        else if (mx >= 538 && mx <= 776 && my >= (screenwidth - 355) && my <= (screenwidth - 275))
+        else if (mx >= 511 && mx <= 780 && my >= (screenwidth - 300) && my <= (screenwidth - 203))
         {
-
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             gameState = 3;
         }
         // Options page
-        else if (mx >= 559 && mx <= 762 && my >= (screenwidth - 468) && my <= (screenwidth - 380))
+        else if (mx >= 538 && mx <= 762 && my >= (screenwidth - 438) && my <= (screenwidth - 335))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             // printf("Options!!\n");
             gameState = 4;
         }
-        else if (mx >= 526 && mx <= 790 && my >= (screenwidth - 630) && my <= (screenwidth - 505))
+        else if (mx >= 517 && mx <= 785 && my >= (screenwidth - 562) && my <= (screenwidth - 487))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
+            // printf("Leaderboard\n");
+            gameState = 6;
+        }
+        else if (mx >= 548 && mx <= 751 && my >= (screenwidth - 686) && my <= (screenwidth - 609))
+        {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             // printf("About!!\n");
             gameState = 5;
         }
@@ -275,6 +416,12 @@ void iMouse(int button, int state, int mx, int my)
     {
         if (mx >= 526 && mx <= 776 && my >= (screenwidth - 623) && my <= (screenwidth - 547))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             // printf("Let's Go back to Menu\n");
             gameState = 0;
         }
@@ -283,6 +430,12 @@ void iMouse(int button, int state, int mx, int my)
     {
         if (mx >= 550 && mx <= 796 && my >= (screenwidth - 580) && my <= (screenwidth - 510))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             gameState = 0;
         }
     }
@@ -290,6 +443,12 @@ void iMouse(int button, int state, int mx, int my)
     {
         if (mx >= 461 && mx <= 884 && my >= (screenwidth - 629) && my <= (screenwidth - 573))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             gameState = 0;
         }
     }
@@ -300,19 +459,38 @@ void iMouse(int button, int state, int mx, int my)
     // gameState 3 : How to Play
     // gameState 4 : Options
     // gameState 5: About
+    // gameState 6:Leaderboard
 
     if (gameState == 4) // options
     {
         if (mx >= 580 && mx <= 749 && my >= (screenwidth - 244) && my <= (screenwidth - 172))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             musicOn = true;
         }
         if (mx >= 580 && mx <= 74 && my >= (screenwidth - 348) && my <= (screenwidth - 273))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             musicOn = false;
         }
         if (mx >= 550 && mx <= 785 && my >= (screenwidth - 596) && my <= (screenwidth - 510))
         {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
             gameState = 0;
         }
     }
@@ -360,25 +538,38 @@ void iKeyboard(unsigned char key)
     GLUT_KEY_LEFT, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_DOWN, GLUT_KEY_PAGE UP,
     GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
     */
+int bgSoundIdx = -1; //
 void iSpecialKeyboard(unsigned char key)
 {
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        iIncreaseVolume(bgSoundIdx, 5);
+        break;
+    case GLUT_KEY_DOWN:
+        iDecreaseVolume(bgSoundIdx, 5);
+        break;
+        // place your codes for other keys here
+    default:
+        break;
+    }
     // place your codes for other keys here
-    if (key == GLUT_KEY_UP)
-    {
-        gameState = 1;
-    }
-    else if (key == GLUT_KEY_DOWN)
-    {
-        gameState = 0;
-    }
-    if (key == GLUT_KEY_RIGHT)
-    {
-        standPosition = false;
-    }
-    else if (key == GLUT_KEY_LEFT)
-    {
-        standPosition = true;
-    }
+    /* if (key == GLUT_KEY_UP)
+     {
+         gameState = 1;
+     }
+     else if (key == GLUT_KEY_DOWN)
+     {
+         gameState = 0;
+     }
+     if (key == GLUT_KEY_RIGHT)
+     {
+         standPosition = false;
+     }
+     else if (key == GLUT_KEY_LEFT)
+     {
+         standPosition = true;
+     }*/
 }
 void iMouseMove(int mx, int my)
 {
@@ -404,14 +595,26 @@ void iDraw()
     {
         iShowImage(0, 0, "Candy-Rush/UI/WelcomeNew.png");
         loading++;
-        if (loading > 13)
+        /*if (musicOn)
         {
-            gameState = 0;
+            importantSoundsOn = true;
+            PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        }
+        importantSoundsOn = false;*/
+        if (loading > 15)
+        {
             loading = 0;
+            gameState = 0;
         }
     }
     else if (gameState == 0)
     {
+        /*if (musicOn)
+        {
+            importantSoundsOn = true;
+            PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        }
+        importantSoundsOn = false;*/
         iShowImage(0, 0, "Candy-Rush/UI/MenuNew.png");
 
         score = 0;
@@ -423,15 +626,20 @@ void iDraw()
     }
     else if (gameState == 1)
     {
+        iStopSound(bgSoundIdx);
         func_timers();
-        int i;
+        iClear();
+	iShowLoadedImage(0, 0, &bg);
+	iWrapImage(&bg, speed);
+       /* int i;
         for (i = 0; i < 50; i++)
         {
-            iShowImage(bc1[i].x, bc1[i].y, bc[i]);
-        }
-        if (speedUpEffect || second <= 10)
+            // iShowImage(bc1[i].x, bc1[i].y, bc[i]);
+            iShowImage(back1[i].x, back1[i].y, back[i]);
+        }*/
+        if (speedUpEffect)
         {
-            iShowImage(X - 58, Y + coordinateJump, "Candy-Rush/ExtraLabels/MagicPotion.png");
+            iShowImage(X - 58, Y + coordinateJump, "Candy-Rush/ExtraLabels/MagicPotionEffect.png");
         }
         if (doubleFrostingsEffect)
         {
@@ -504,22 +712,12 @@ void iDraw()
                 iShowImage(obs1.obs_x, obs1.obs_y, "Candy-Rush/Frostings/Obstacle.png");
             }
         }
-        if (enemy.x != obs2.obs_x)
-        {
-            if (enemy.active)
-            {
-                iShowImage(enemy.x, enemy.y, enemyRun[enemyRunidx]);
-            }
-            if (obs2.active)
-            {
-                iShowImage(obs2.obs_x, obs2.obs_y, "Candy-Rush/Frostings/ObstacleIce.png");
-            }
-        }
 
         if (speedUp.active)
         {
 
             iShowImage(speedUp.x, speedUp.y, "Candy-Rush/ExtraLabels/MagicPotion.png");
+            
         }
         if (doubleFrostings.active)
         {
@@ -567,9 +765,8 @@ void iDraw()
         moveObstacle();
         checkCollision();
     }
-
     // Gameover Scene
-    else if (gameState == 2)
+    if (gameState == 2)
     {
         printf(" Score: %d", score);
         iSetColor(255, 255, 255);
@@ -596,13 +793,14 @@ void iDraw()
 
     // How to play
     /*char welcomePage[30] = "UI//WelcomeNew.png";
-char menuPage[30] = "UI//MenuNew.png";
-char howToPlay[30] = "UI//HowToPlayNew.png";
-char musicControl[30] = "UI//MusicControlNew.png";
-char about[20] = "UI//About.png";
-char gameOver[20] = "UI//GameOver.png";
+    char menuPage[30] = "UI//MenuNew.png";
+    char howToPlay[30] = "UI//HowToPlayNew.png";
+    char musicControl[30] = "UI//MusicControlNew.png";
+    char about[20] = "UI//About.png";
+    char gameOver[20] = "UI//GameOver.png";
 
-*/
+    */
+
     else if (gameState == 3)
     {
 
@@ -615,13 +813,13 @@ char gameOver[20] = "UI//GameOver.png";
 
         iShowImage(0, 0, "Candy-Rush/UI/MusicControlNew.png");
         /* if (musicOn)
-         {
-             iShowBMP2(screenlength / 2 - 120, screenwidth / 2 - 100, musicOnpic, 0);
-         }
-         else
-         {
-             iShowBMP2(screenlength / 2 - 120, screenwidth / 2 - 100, musicOffpic, 0);
-         }*/
+          {
+              iShowBMP2(screenlength / 2 - 120, screenwidth / 2 - 100, musicOnpic, 0);
+          }
+          else
+          {
+              iShowBMP2(screenlength / 2 - 120, screenwidth / 2 - 100, musicOffpic, 0);
+          }*/
     }
     else if (gameState == 5) // About
     {
@@ -677,10 +875,6 @@ void func_timers()
     {
         ++collisionTimeOut;
     }
-    if (!obs2.active)
-    {
-        ++collisionTimeOut;
-    }
 }
 
 /*--------------------Render Candy-Rush/Background-------------------------*/
@@ -689,11 +883,12 @@ void setAll()
     int sum = 0;
     for (int i = 0; i < 50; i++)
     {
-        bc1[i].y = 0;
-        bc1[i].x = sum;
+        back1[i].y = 0;
+        back1[i].x = sum; // bc1[i].y = 0;
+        // bc1[i].x = sum;
         sum += 26;
     }
-}
+}/*
 void change()
 {
     if (gameState == 1)
@@ -701,12 +896,18 @@ void change()
         for (int i = 0; i < 50; i++)
         {
             bc1[i].x -= 26;
-            if (bc1[i].x < 0)
-            {
+          if (bc1[i].x < 0)
+           {
                 bc1[i].x = 1300 - 26;
             }
         }
-    }
+            //back1[i].x -= 26;
+          //  if (back1[i].x < 0)
+           // {
+             //   back1[i].x = 1300 - 26;
+            //}
+        //}
+    //}
  /* if (gameState == 1)
     {
         for (int i = 0; i < 29; i++)
@@ -718,15 +919,15 @@ void change()
             }
         }
     }
-}*/}
+}*/
  void jumping()
  {
      if (jump)
      {
-         if (musicOn)
-         {
-             // PlaySound(TEXT("Accessory/Sound_bites/Jump_sound.wav"),NULL,SND_FILENAME|SND_ASYNC);
-         }
+         // if (musicOn)
+         //{
+         //   PlaySound(TEXT("Candy-Rush/SoundEffect/pixel-jump-319167.wav"),NULL,SND_FILENAME|SND_ASYNC);
+         // }
 
          if (jumpUp)
          {
@@ -758,10 +959,6 @@ void change()
      obs1.obs_y = 135;
      obs1.obs_width = 64;
      obs1.obs_height = 61;
-     obs2.obs_x = 1300;
-     obs2.obs_y = 135;
-     obs2.obs_width = 64;
-     obs2.obs_height = 61;
  }
  void generateObstacle()
  {
@@ -769,11 +966,6 @@ void change()
      if (x == 1 && collisionTimeOut > 50)
      {
          obs1.active = true;
-         collisionTimeOut = 0;
-     }
-     if (x == 1 && collisionTimeOut > 100)
-     {
-         obs2.active = true;
          collisionTimeOut = 0;
      }
  }
@@ -784,12 +976,6 @@ void change()
      {
          obs1.active = false;
          obs1.obs_x = 1300;
-     }
-      obs2.obs_x -= 30;
-     if (obs2.obs_x < 0)
-     {
-         obs2.active = false;
-         obs2.obs_x = 1300;
      }
  }
  void checkCollision()
@@ -802,11 +988,11 @@ void change()
              // printf("Collision detected!\n");
              obs1.active = false;
              ++collisionNumber;
-             /*if (musicOn)
+             if (musicOn)
              {
-                 PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.mp3"), NULL, SND_FILENAME | SND_ASYNC);
+                 PlaySound(TEXT("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav"), NULL, SND_FILENAME | SND_ASYNC);
              }
- */
+
              charHurt = true;
              if (charHurt)
              {
@@ -825,48 +1011,17 @@ void change()
          }
      }
      // generate_obstacle();
-     
-     if (obs2.active && second > 10)
-     {
-         // printf("Entered checkCollsion\n");
-         if ((X < obs2.obs_x + obs2.obs_width && X + playerWidth > obs2.obs_x) && ((Y + coordinateJump) < obs2.obs_y + obs2.obs_height && (Y + coordinateJump) + playerHeight > obs2.obs_y) && !speedUpEffect)
-         {
-             // printf("Collision detected!\n");
-             obs2.active = false;
-             ++collisionNumber;
-             /*if (musicOn)
-             {
-                 PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.mp3"), NULL, SND_FILENAME | SND_ASYNC);
-             }
- */
-             charHurt = true;
-             if (charHurt)
-             {
-                 // printf("Initiate hurt anim\n");
-             }
-             // printf("Collision no: %d\n",collision_number);
-             // gameState = 0;
-             if (collisionNumber > 3)
-             {
-                 gameState = 2;
-                 collisionNumber = 0;
-                 // score=0;
-                 // second=0;
-             }
-             // printf("Collision detected!\n");
-         }
-     }
+
      // generate_obstacle();
-   
  }
 
  /*----------Reaper------------------------*/
  void setEnemy()
  {
-     enemy.x = 1300 + 150;
+     enemy.x = 1300 + 200;
      enemy.y = 107;
-     enemy.width = 100;
-     enemy.height = 129;
+     enemy.width = 190;
+     enemy.height = 235;
  }
  void generateEnemy()
  {
@@ -876,8 +1031,8 @@ void change()
          if (enemyDeadTimer > 50)
          {
              enemy.active = true;
-             enemy.width = 100;
-             enemy.height = 129;
+             enemy.width = 190;
+             enemy.height = 235;
              enemyDeadTimer = 0;
          }
      }
@@ -889,16 +1044,16 @@ void change()
      {
          enemy.active = false;
          enemy.x = 1300 + 150;
-         enemy.width = 100;
-         enemy.height = 129;
+         enemy.width = 190;
+         enemy.height = 235;
      }
  }
  void checkEnemyCollision()
  {
      if (enemy.active)
      {
-         enemy.width = 120;
-         enemy.height = 140;
+         enemy.width = 190;
+         enemy.height = 235;
          // printf("Entered checkCollsion\n");
          if ((enemy.x - X) < 120)
          {
@@ -906,10 +1061,10 @@ void change()
              {
                  enemy.active = false;
                  kill = false;
-                 /* if (musicOn)
-                  {
-                      PlaySound(TEXT("Candy-Rush\SoundEffect\deadly-strike-352458.mp3"), NULL, SND_FILENAME | SND_ASYNC);
-                  }*/
+                 if (musicOn)
+                 {
+                     PlaySound(TEXT("Candy-Rush/SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                 }
              }
          }
          if ((X < enemy.x + enemy.width && X + playerWidth > enemy.x) && ((Y + coordinateJump) < enemy.y + enemy.height && (Y + coordinateJump) + playerHeight > enemy.y) && !speedUpEffect)
@@ -918,20 +1073,20 @@ void change()
              {
                  enemy.active = false;
                  kill = false;
-                 // if (musicOn)
-                 //{
-                 //      PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                 //  }
+                 if (musicOn)
+                 {
+                     PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                 }
              }
              else if (second > 10)
              {
                  // printf("Enemy detected!\n");
                  enemy.active = false;
                  ++collisionNumber;
-                 // if (musicOn)
-                 //  {
-                 //      PlaySound(TEXT("SoundEffect/drop-sound-effect-240899.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                 //  }
+                 if (musicOn)
+                 {
+                     PlaySound(TEXT("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                 }
                  charHurt = true;
                  if (charHurt)
                  {
@@ -990,11 +1145,11 @@ void change()
                  {
                      totalFrostingCollected++;
                  }
-                 //   if (musicOn & !importantSoundsOn)
-                 //   {
-                 //      PlaySound(TEXT("SoundEffect/coin-collision-sound-342335.mp3"), NULL, SND_FILENAME | SND_ASYNC);
-                 //  }
-                 // printf("Coin collected at (%d, %d)! Total: %d\n", coins[i].x, coins[i].y, totalCoinsCollected);
+                 if (musicOn & !importantSoundsOn)
+                 {
+                     PlaySound(TEXT("Candy-Rush/SoundEffect/coin-collision-sound-342335.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                 }
+                 printf("Coin collected at (%d, %d)! Total: %d\n", frostings[i].x, frostings[i].y, totalFrostingCollected);
              }
          }
          else
@@ -1078,7 +1233,7 @@ void change()
          if (musicOn)
          {
              importantSoundsOn = true;
-             //  PlaySound(TEXT("Accessory/Sound_bites/Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
+             PlaySound(TEXT("Candy-Rush/SoundEffect/powerUp.wav"), NULL, SND_FILENAME | SND_ASYNC);
          }
          importantSoundsOn = false;
      }
@@ -1128,7 +1283,7 @@ void change()
          if (musicOn)
          {
              importantSoundsOn = true;
-             // PlaySound(TEXT("Accessory/Sound_bites/Powerup_sound.wav"), NULL, SND_FILENAME | SND_ASYNC);
+             PlaySound(TEXT("Candy-Rush/SoundEffect/powerUp.wav"), NULL, SND_FILENAME | SND_ASYNC);
          }
          importantSoundsOn = false;
      }
@@ -1301,7 +1456,7 @@ void change()
 
      attackIdx++;
      if (attackIdx >= 3)
-       attackIdx = 0;
+         attackIdx = 0;
 
      /*-----------Reaper-----------*/
      enemyRunidx++;
@@ -1326,7 +1481,7 @@ void change()
  void coinAnim()
  {
      frostingIdx++;
-     if (frostingIdx >=7)
+     if (frostingIdx >= 7)
          frostingIdx = 0;
  }
  void generateBarriers()
@@ -1344,7 +1499,7 @@ void change()
  {
      coinAnim();
      moveFrostings();
-     rosteringFrostings();
+    rosteringFrostings();
  }
  void movePowerups()
  {
@@ -1357,7 +1512,7 @@ void change()
  {
      glutInit(&argc, argv);
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-
+loadResources();
      srand(time(0));
      setAll();
      setObstacle();
@@ -1372,7 +1527,7 @@ void change()
      iSetTimer(300, generatePowerup);
      iSetTimer(100, movePowerups); // call them in int main
      iSetTimer(500, hurtAnim);
-     iSetTimer(100, change);
+     //iSetTimer(100, change);
 
      iSetTimer((100), moveEnemy);
 
@@ -1383,7 +1538,10 @@ void change()
      // Coins
 
      iSetTimer(100, allfrosting);
+     iInitializeSound();
+     bgSoundIdx = iPlaySound("Candy-Rush/SoundEffect/playthroughmusic.wav", true, 50);
      iInitialize(screenlength, screenwidth, "Candy-Rush");
+
      glutMainLoop();
 
      return 0;

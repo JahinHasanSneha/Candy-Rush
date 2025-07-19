@@ -881,7 +881,7 @@ void checkEnemyCollision()
                     PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
-            else if (second > 10)
+            else if (second > 5)
             {
 
                 enemy.active = false;

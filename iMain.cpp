@@ -76,7 +76,7 @@ struct Frosting
 struct Frosting frostings[MAX_FROSTINGS];
 
 char welcomePage[30] = "Candy-Rush/UI/WelcomeNew.png";
-char menuPage[30] = "Candy-Rush/UI/MenuNew2.png";
+char menuPage[36] = "Candy-Rush/UI/sara (2).png";//changing menu page "Candy-Rush/UI/MenuNew2.png"//30
 char howToPlay[50] = "Candy-Rush/UI/HowToPlayNew2.png";
 char musicControl[50] = "Candy-Rush/UI/MusicControlNew.png";
 char about[50] = "Candy-Rush/UI/About.png";
@@ -179,8 +179,33 @@ void gainDoubleFrostingPower();
 void GameOver();
 void readScore();
 void showChar();
-
+//
 void func_timers();
+//
+void highlightScoreRow(int score)
+{
+    int x = 400;       // Shifted X to match your tagboard position
+    int width = 500;   // Adjusted width to match table
+    int height = 45;   // Each row height based on image
+
+    int y;
+
+    if (score >= 1000)
+        y = 512; // Top row
+    else if (score >= 800)
+        y = 454;
+    else if (score >= 600)
+        y = 396;
+    else if (score >= 400)
+        y = 338;
+    else
+        y = 280; // Bottom row//246,
+
+    iSetTransparentColor(218, 112, 214,0.8);  // Light yellow highlight
+    iFilledRectangle(x, y, width, height);
+}
+
+//
 
 void changeTimer()
 {
@@ -221,18 +246,19 @@ void GameOver()
 {
     iSetColor(128, 128, 128);
     iFilledRectangle(0, 0, screenwidth, screenlength);
-    iShowImage(0, 0, "Candy-Rush/UI/GameOver.png");
+    iShowImage(0, 0,"Candy-Rush/UI/candy_fair_tag_boardpng (1).png" );
+   // iShowImage(0, 0, "Candy-Rush/UI/GameOver.png");
 
     gameState = 2;
 }
 void iMouse(int button, int state, int mx, int my)
 {
-    // printf("x=%d y=%d\n",mx,my);
+    printf("x=%d y=%d\n",mx,my);
 
     if (gameState == 0) // Menu
     {
         // PLAY
-        if (mx >= 550 && mx <= 751 && my >= (screenwidth - 176) && my <= (screenwidth - 90))
+        if (mx >= 545 && mx <= 760 && my >= 500 && my <= 760)
         {
             if (musicOn)
             {
@@ -244,7 +270,7 @@ void iMouse(int button, int state, int mx, int my)
         }
 
         // How to play
-        else if (mx >= 511 && mx <= 780 && my >= (screenwidth - 300) && my <= (screenwidth - 203))
+        else if (mx >= 545 && mx <= 760 && my >= 311 && my <= 356)   //[311,356]
         {
             if (musicOn)
             {
@@ -255,7 +281,7 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 3;
         }
         // Options
-        else if (mx >= 538 && mx <= 762 && my >= (screenwidth - 438) && my <= (screenwidth - 335))
+        else if (mx >= 545 && mx <= 760 && my >= 420 && my <= 490)  //   [420,490]
         {
             if (musicOn)
             {
@@ -295,7 +321,7 @@ void iMouse(int button, int state, int mx, int my)
     }
     if (gameState == 2)
     {
-        if (mx >= 526 && mx <= 776 && my >= (screenwidth - 623) && my <= (screenwidth - 547))
+        if (mx >= 565 && mx <= 735 && my >= 50 && my <= 135)// menu r co ordinate boshate hobe abr change korbe
         {
             if (musicOn)
             {
@@ -486,7 +512,7 @@ void iDraw()
             PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.wav"), NULL, SND_FILENAME | SND_ASYNC);
         }
         importantSoundsOn = false;*/
-        iShowImage(0, 0, "Candy-Rush/UI/MenuNew2.png");
+        iShowImage(0, 0,"Candy-Rush/UI/sara (2).png");
 
         score = 0;
         totalFrostingCollected = 0;
@@ -634,13 +660,38 @@ void iDraw()
 
     if (gameState == 2)
     {
-        printf(" Score: %d", score);
-        iSetColor(255, 255, 255);
-        sprintf(point, "Score: %d", score);
-        iText(1038, screenwidth - 80, point, GLUT_BITMAP_HELVETICA_18);
+     // here i have to place my code for tagboard
+    // First draw the background tagboard image (if any)
+    // iShowImage(...); ← Add your tagboard BG image if used
+    iShowImage(0, 0,"Candy-Rush/UI/candy_fair_tag_boardpng (1).png" );
+     
+    // Step 1: Highlight background row based on score
+    highlightScoreRow(score);
 
-        GameOver();
-        showChar();
+    // Step 2: Now draw tagboard text on top
+  //  iSetColor(255, 128, 0); // Orange text color(255,128,0)
+   // iText(430, 510, "1000+     Legendary Licker", GLUT_BITMAP_HELVETICA_18);
+   // iText(430, 450, "800-999   Sugar Blaster", GLUT_BITMAP_HELVETICA_18);
+   // iText(430, 390, "600-799   Wizard of Sweets", GLUT_BITMAP_HELVETICA_18);
+    //iText(430, 330, "400-599   Tooth Decayer", GLUT_BITMAP_HELVETICA_18);
+   // iText(430, 270, "0-399     Candy Defender", GLUT_BITMAP_HELVETICA_18);
+
+    // Optional: Show score
+    char point[50];
+    sprintf(point, "Your Score: %d", score);// totalFrostingCollected
+    iSetColor(128, 0, 0);// 255,255,255
+    iText(500, 200, point, GLUT_BITMAP_HELVETICA_18);
+    
+
+
+
+        //printf(" Score: %d", score);
+        //iSetColor(255, 255, 255);
+        //sprintf(point, "Score: %d", score);
+       // iText(1038, screenwidth - 80, point, GLUT_BITMAP_HELVETICA_18);
+
+        //GameOver();
+        //showChar();
     }
     // gameState -1: Welcome Page
     // gameState 0 : MenuPage
@@ -881,7 +932,7 @@ void checkEnemyCollision()
                     PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
-            else if (second > 5)
+            else if (second > 10)
             {
 
                 enemy.active = false;

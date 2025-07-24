@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <direct.h>
 #include "iSound.h"
-
 #define screenwidth 731
 #define screenlength 1300
+
 int bgSoundIdx = -1;
 bool importantSoundsOn = false;
 bool runState = false;
@@ -23,6 +23,7 @@ int X = 350;
 int Y = 135;
 Image bg;
 int speed = -25;
+
 void loadResources()
 {
     iLoadImage(&bg, "Candy-Rush/Background/Background2.png");
@@ -272,7 +273,7 @@ void iMouse(int button, int state, int mx, int my)
                 PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
             }
             importantSoundsOn = false;
-            // printf("Options!!\n");
+           
             gameState = 4;
         }
         else if (mx >= 517 && mx <= 785 && my >= (screenwidth - 580) && my <= (screenwidth - 480))
@@ -287,7 +288,7 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 6;
         }
         else if (mx >= 553 && mx <= 751 && my >= (screenwidth - 696) && my <= (screenwidth - 609))
-        { // about
+        { //About
             if (musicOn)
             {
                 importantSoundsOn = true;
@@ -316,7 +317,7 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 0;
         }
     }
-    if (gameState == 5) // About
+    if (gameState == 5) 
     {
         if (mx >= 550 && mx <= 796 && my >= (screenwidth - 580) && my <= (screenwidth - 510))
         {
@@ -350,7 +351,7 @@ void iMouse(int button, int state, int mx, int my)
     // gameState 3 : How to Play
     // gameState 4 : Options
     // gameState 5: About
-    // gameState 6:Leaderboard
+    // gameState 6:Acievements
 
     if (gameState == 4) // options
     {
@@ -440,25 +441,7 @@ void iKeyboard(unsigned char key)
 // int bgSoundIdx = -1; //
 void iSpecialKeyboard(unsigned char key)
 {
-    // if (key == GLUT_KEY_UP)
-    //  place your codes for other keys here
-    // if (key == GLUT_KEY_UP)
-    /*if (key == 'r'|| key=='R')
-    {
-        gameState = 1;
-    }
-    else if (GLUT_KEY_DOWN)
-    {
-        gameState = 0;
-    }
-    if (key == GLUT_KEY_RIGHT)
-    {
-        standPosition = false;
-    }
-    else if (key == GLUT_KEY_LEFT)
-    {
-        standPosition = true;
-    }//*/
+    
     switch (key)
     {
     case GLUT_KEY_UP:
@@ -1123,19 +1106,7 @@ void gainDoubleFrostingPower()
     }
 }
 
-/*char str1[100];
-void showChar()
-{
-    iSetColor(0, 0, 0);
-    // iText(400,500,"Enter your Name: ",GLUT_BITMAP_HELVETICA_18);
-    // iRectangle(495,450,160,30);
-    iText(screenlength / 2 - 100 + 50, 460, str1, GLUT_BITMAP_HELVETICA_18);
-}*/
 
-/*
-    function iMouseMove() is called when the user presses and drags the mouse.
-    (mx, my) is the position where the mouse pointer is.
-    */
 
 void charAnimations()
 {
@@ -1241,5 +1212,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-    

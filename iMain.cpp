@@ -4,17 +4,17 @@
 #include <stdlib.h>
 #include <direct.h>
 #include "iSound.h"
+
 #define screenwidth 731
 #define screenlength 1300
 
-int bgSoundIdx = -1;
 bool importantSoundsOn = false;
 bool runState = false;
-int gameState = -1;
-int loading = 0;
+int gameState = -2; //-1
+int loading = 0;    // 0
 int loading1 = 0;
 bool musicOn = true;
-void drawHUD();
+
 int collisionNumber = 0;
 bool charHurt = false;
 
@@ -23,7 +23,97 @@ int X = 350;
 int Y = 135;
 Image bg;
 int speed = -25;
+//    username
+char username[100] = "";
+int usernameIndex = 0;
+bool usernameEntered = false;
+// username
+// leaderboard
 
+#define MAX_PLAYERS 100
+
+typedef struct
+{
+    char username[100];
+    int score;
+} LeaderboardEntry;
+
+LeaderboardEntry leaderboard[MAX_PLAYERS];
+int leaderboardSize = 0;
+void drawHUD();
+void addToLeaderboard(char *username, int score)
+{
+    if (leaderboardSize < MAX_PLAYERS)
+    {
+        strcpy(leaderboard[leaderboardSize].username, username);
+        leaderboard[leaderboardSize].score = score;
+        leaderboardSize++;
+    }
+}
+int compare(const void *a, const void *b)
+{
+    LeaderboardEntry *p1 = (LeaderboardEntry *)a;
+    LeaderboardEntry *p2 = (LeaderboardEntry *)b;
+    return p2->score - p1->score;
+}
+
+void sortLeaderboard()
+{
+    qsort(leaderboard, leaderboardSize, sizeof(LeaderboardEntry), compare);
+}
+void saveLeaderboardToFile(const char *filename)
+{
+    FILE *fp = fopen(filename, "a"); // w
+    if (fp == NULL)
+    {
+        printf("Error opening file for writing\n");
+        return;
+    }
+    for (int i = 0; i < leaderboardSize; i++)
+    {
+        fprintf(fp, "%s %d\n", leaderboard[i].username, leaderboard[i].score);
+    }
+    fclose(fp);
+}
+void loadLeaderboardFromFile(const char *filename)
+{
+    FILE *fp = fopen(filename, "r+");
+    if (fp == NULL)
+    {
+        printf("File not found, starting with empty leaderboard.\n");
+        return;
+    }
+    leaderboardSize = 0;
+    while (fscanf(fp, "%s %d", leaderboard[leaderboardSize].username,
+                  &leaderboard[leaderboardSize].score) == 2)
+    {
+        leaderboardSize++;
+        if (leaderboardSize >= MAX_PLAYERS)
+            break;
+    }
+    fclose(fp);
+}
+Image leaderboardImage;
+void drawLeaderboard()
+{
+    // iShowImage(0,0,"Candy-Rush/UI/leaderboard.png");
+    iShowLoadedImage(0, 0, &leaderboardImage);
+    //  iText(500, 600, "Leaderboard", GLUT_BITMAP_HELVETICA_18);
+    int y = screenwidth - 211;
+    loadLeaderboardFromFile("leaderboard.txt");
+    // saveLeaderboardToFile("leaderboard.txt");
+    sortLeaderboard();
+    for (int i = 0; i < leaderboardSize && i < 6; i++)
+    {
+        char entry[200];
+        sprintf(entry, "%d. %s - %d", i + 1, leaderboard[i].username, leaderboard[i].score);
+        iSetColor(84, 62, 148);
+        iText(362, y, entry, GLUT_BITMAP_HELVETICA_18);
+        y -= 33;
+    }
+}
+
+// leaderboard
 void loadResources()
 {
     iLoadImage(&bg, "Candy-Rush/Background/Background2.png");
@@ -46,26 +136,25 @@ int enemyRunidx = 0;
 
 struct Enemy
 {
-    int x;
-    int y;
+
     int width;
     int height;
+    int x;
+    int y;
+
     bool active;
 
 } enemy;
 int collisionTimeOut = 0;
-int enemyTimeOut = 0;
+
 int enemyDeadTimer = 0;
-
-char powerUpSound[60] = "Candy-Rush/SoundEffect/powerUp.wav";
-
-char frostingSound[60] = "Candy-Rush/SoundEffect/coin-collision-sound-342335.wav";
+int enemyTimeOut = 0;
 
 #define MAX_FROSTINGS 6
 int frostingIdx = 0;
 int totalFrostingCollected = 0;
 int frostingTime = 0;
-char frosting[45][40] = {"Candy-Rush/Frostings/cupcake.png", "Candy-Rush/Frostings/donut.png", "Candy-Rush/Frostings/starCandy.png", "Candy-Rush/Frostings/sugarcandy.png", "Candy-Rush/Frostings/toffee.png", "Candy-Rush/Frostings/lolipop.png"};
+char frosting[45][40] = {"Candy-Rush/Frostings/cupcake.png", "Candy-Rush/Frostings/donut.png", "Candy-Rush/Frostings/starCandy.png", "Candy-Rush/Frostings/sugarCandy.png", "Candy-Rush/Frostings/toffee.png", "Candy-Rush/Frostings/lolipop.png"};
 
 struct Frosting
 {
@@ -88,15 +177,18 @@ int coordinateJump = 0;
 
 struct powerUp
 {
-    int x;
-    int y;
+
     int width;
     int height;
+    int x;
+    int y;
     bool active;
 } speedUp, doubleFrostings;
 
 char magicPotion[40] = "Candy-Rush/ExtraLabels/MagicPotion.png";
 
+char doubleFrostingPowerup[50] = "Candy-Rush/ExtraLabels/Diamond.png";
+char doubleFrostingEffectPic[50] = "Candy-Rush/ExtraLabels/double_coins.png";
 bool doubleFrostingsEffect = false;
 int doubleFrostingsEffectActivatorTimer = 0;
 int doubleFrostingsEffectDeactivatorTimer = 0;
@@ -169,9 +261,9 @@ void func_timers();
 //
 void highlightScoreRow(int score)
 {
-    int x = 400;     // Shifted X to match your tagboard position
-    int width = 500; // Adjusted width to match table
-    int height = 45; // Each row height based on image
+    int x = 280;     // Shifted X to match your tagboard position
+    int width = 600; // 510  // Adjusted width to match table
+    int height = 46; // Each row height based on image
 
     int y;
 
@@ -184,7 +276,7 @@ void highlightScoreRow(int score)
     else if (score >= 400)
         y = 338;
     else
-        y = 280; // Bottom row//246,
+        y = 299; // Bottom row//246,
 
     iSetTransparentColor(218, 112, 214, 0.8); // Light yellow highlight
     iFilledRectangle(x, y, width, height);
@@ -216,33 +308,31 @@ void drawTimer()
         iText(1038, screenwidth - 80, point, GLUT_BITMAP_HELVETICA_18);
     }
 }
-// gameState -1: Welcome Page
-// gameState 0 : MenuPage
-// gameState 1 : Actual Game
-// gameState 2 : Gameover
-// gameState 3 : How to Play
-// gameState 4 : Options
-// gameState 5: About
-// gameState 6:Leaderboard
+// gameState -1   : Welcome Page
+// gameState 0     : MenuPage
+// gameState 1    : Actual Game
+// gameState 2       : Gameover
+// gameState 3      : How to Play
+// gameState 4    : Options
+// gameState 5   : About
+// gameState 6   :Leaderboard
 
 void GameOver()
 {
     iSetColor(128, 128, 128);
     iFilledRectangle(0, 0, screenwidth, screenlength);
-    iShowImage(0, 0, "Candy-Rush/UI/candy_fair_tag_boardpng (1).png");
-    // iShowImage(0, 0, "Candy-Rush/UI/GameOver.png");
+    iShowImage(0, 0, "Candy-Rush/UI/pinkCandyFair.png");
 
     gameState = 2;
 }
-
 void iMouse(int button, int state, int mx, int my)
 {
-    // printf("x=%d y=%d\n",mx,my);
+    printf("x=%d y=%d\n", mx, my);
 
     if (gameState == 0) // Menu
     {
         // PLAY
-        if (mx >= 550 && mx <= 751 && my >= (screenwidth - 176) && my <= (screenwidth - 90))
+        if (mx >= 550 && mx <= 751 && my >= (screenwidth - 173) && my <= (screenwidth - 90))
         {
             if (musicOn)
             {
@@ -254,7 +344,7 @@ void iMouse(int button, int state, int mx, int my)
         }
 
         // How to play
-        else if (mx >= 511 && mx <= 780 && my >= (screenwidth - 296) && my <= (screenwidth - 207))
+        else if (mx >= 511 && mx <= 780 && my >= (screenwidth - 296) && my <= (screenwidth - 207)) //[311,356]
         {
             if (musicOn)
             {
@@ -265,7 +355,7 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 3;
         }
         // Options
-        else if (mx >= 538 && mx <= 762 && my >= (screenwidth - 448) && my <= (screenwidth - 335))
+        else if (mx >= 538 && mx <= 762 && my >= (screenwidth - 448) && my <= (screenwidth - 335)) //   [420,490]
         {
             if (musicOn)
             {
@@ -273,7 +363,7 @@ void iMouse(int button, int state, int mx, int my)
                 PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
             }
             importantSoundsOn = false;
-           
+
             gameState = 4;
         }
         else if (mx >= 517 && mx <= 785 && my >= (screenwidth - 580) && my <= (screenwidth - 480))
@@ -286,9 +376,18 @@ void iMouse(int button, int state, int mx, int my)
             importantSoundsOn = false;
 
             gameState = 6;
+
+            if (gameState == 6)
+            {
+                if (mx >= 848 && mx <= 852 && my >= 107 && my <= 112)
+
+                {
+                    gameState = 0;
+                }
+            }
         }
-        else if (mx >= 553 && mx <= 751 && my >= (screenwidth - 696) && my <= (screenwidth - 609))
-        { //About
+        else if (mx >= 573 && mx <= 771 && my >= (screenwidth - 696) && my <= (screenwidth - 609))
+        { // about
             if (musicOn)
             {
                 importantSoundsOn = true;
@@ -305,7 +404,7 @@ void iMouse(int button, int state, int mx, int my)
     }
     if (gameState == 2)
     {
-        if (mx >= 508 && mx <= 795 && my >= (screenwidth - 673) && my <= (screenwidth - 574))
+        if (mx >= 508 && mx <= 795 && my >= (screenwidth - 673) && my <= (screenwidth - 574)) // menu r co ordinate boshate hobe abr change korbe
         {
             if (musicOn)
             {
@@ -317,9 +416,9 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 0;
         }
     }
-    if (gameState == 5) 
+    if (gameState == 5)
     {
-        if (mx >= 550 && mx <= 796 && my >= (screenwidth - 580) && my <= (screenwidth - 510))
+        if (mx >= 550 && mx <= 810 && my >= (screenwidth - 580) && my <= (screenwidth - 510))
         {
             if (musicOn)
             {
@@ -330,8 +429,7 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 0;
         }
     }
-
-    if (gameState == 3) // howtoplay
+    if (gameState == 3)
     {
         if (mx >= 461 && mx <= 884 && my >= (screenwidth - 629) && my <= (screenwidth - 573))
         {
@@ -351,7 +449,7 @@ void iMouse(int button, int state, int mx, int my)
     // gameState 3 : How to Play
     // gameState 4 : Options
     // gameState 5: About
-    // gameState 6:Acievements
+    // gameState 6:Leaderboard
 
     if (gameState == 4) // options
     {
@@ -365,7 +463,7 @@ void iMouse(int button, int state, int mx, int my)
             importantSoundsOn = false;
             musicOn = true;
         }
-        if (mx >= 580 && mx <= 74 && my >= (screenwidth - 348) && my <= (screenwidth - 273))
+        if (mx >= 580 && mx <= 749 && my >= (screenwidth - 348) && my <= (screenwidth - 273))
         {
             if (musicOn)
             {
@@ -375,7 +473,7 @@ void iMouse(int button, int state, int mx, int my)
             importantSoundsOn = false;
             musicOn = false;
         }
-        if (mx >= 550 && mx <= 785 && my >= (screenwidth - 596) && my <= (screenwidth - 510))
+        if (mx >= 550 && mx <= 799 && my >= (screenwidth - 596) && my <= (screenwidth - 510))
         {
             if (musicOn)
             {
@@ -386,10 +484,61 @@ void iMouse(int button, int state, int mx, int my)
             gameState = 0;
         }
     }
+    // leaderboard page
+    /* if(gameState == 6)
+     {
+         if(mx >= 848 && mx <= 852 && my >= 107 && my <= 112)
+         //if( mx == 721 && my == 59)
+         {
+             gameState = 0;
+         }
+     }*/
+    if (gameState == 6) // leaderboard
+        if (mx >= 516 && mx <= 781 && my >= (screenwidth - 670) && my <= (screenwidth - 580))
+        {
+            if (musicOn)
+            {
+                importantSoundsOn = true;
+                PlaySound(TEXT("Candy-Rush/SoundEffect/click.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            }
+            importantSoundsOn = false;
+            gameState = 0;
+        }
 }
+
+/*
+    function iKeyboard() is called whenever the user hits a key in keyboard.
+    key- holds the ASCII value of the key pressed.
+    */
+int saveScore = 0;
 
 void iKeyboard(unsigned char key)
 {
+    if (gameState == -2 && !usernameEntered)
+    {
+        if (key == '\r')
+        { // ENTER key
+            if (usernameIndex > 0)
+            {
+                usernameEntered = true;
+                // You can enable start button here
+            }
+        }
+        else if (key == '\b')
+        { // Backspace
+            if (usernameIndex > 0)
+            {
+                usernameIndex--;
+                username[usernameIndex] = '\0';
+            }
+        }
+        else if (usernameIndex < 99 && key >= 32 && key <= 126)
+        {
+            username[usernameIndex++] = key;
+            username[usernameIndex] = '\0';
+        }
+    }
+
     if (key == ' ')
     {
         if (!jump)
@@ -403,29 +552,16 @@ void iKeyboard(unsigned char key)
         kill = true;
         if (musicOn)
         {
-            importantSoundsOn = true;
-            PlaySound(TEXT("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav"), NULL, SND_FILENAME | SND_ASYNC);
-
-            //   iPlaySound("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav", false);
+            // importantSound("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav"); NULL, SND_FILENAME | SND_ASYNC);
         }
         importantSoundsOn = false;
     }
-
-    if (key == 'r' || key == 'R')
+    if (gameState == 0)
     {
-        gameState = 1;
-    }
-    else if (key == 'p' || key == 'P')
-    {
-        gameState = 0;
-    }
-    if (key == GLUT_KEY_RIGHT)
-    {
-        standPosition = false;
-    }
-    else if (key == GLUT_KEY_LEFT)
-    {
-        standPosition = true;
+        if (key == 'L' || key == 'l')
+        {
+            gameState = 3; // Correctly update gameState to 3
+        }
     }
 }
 
@@ -438,22 +574,35 @@ void iKeyboard(unsigned char key)
     GLUT_KEY_LEFT, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_DOWN, GLUT_KEY_PAGE UP,
     GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
     */
-// int bgSoundIdx = -1; //
+int bgSoundIdx = -1; //
 void iSpecialKeyboard(unsigned char key)
 {
-    
-    switch (key)
+
+    // place your codes for other keys here
+    if (key == 's' || key == 'S')
     {
-    case GLUT_KEY_UP:
-        iIncreaseVolume(bgSoundIdx, 5);
-        break;
-    case GLUT_KEY_DOWN:
-        iDecreaseVolume(bgSoundIdx, 5);
-        break;
-        // place your codes for other keys here
-    default:
-        break;
-    } //*/
+        if (usernameEntered)
+        {
+            gameState = -1; // start game
+        }
+    }
+
+    else if (key == GLUT_KEY_UP)
+    {
+        gameState = 1;
+    }
+    else if (key == GLUT_KEY_DOWN)
+    {
+        gameState = 0;
+    }
+    if (key == GLUT_KEY_RIGHT)
+    {
+        standPosition = false;
+    }
+    else if (key == GLUT_KEY_LEFT)
+    {
+        standPosition = true;
+    }
 }
 void iMouseMove(int mx, int my)
 {
@@ -469,12 +618,33 @@ void iMouseWheel(int dir, int mx, int my)
 {
     // place your code here
 }
-
+Image usernameImage;
+Image tagboard_img;
 void iDraw()
 {
     // place your drawing codes here
     iClear();
 
+    if (gameState == -2)
+    {
+        // iLoadImage(&usernameImage,"Candy-Rush/UI/usenameFinal.png");
+        //  iResizeImage(&usernameImage,1300,731);
+        iShowLoadedImage(0, 0, &usernameImage);
+        // iSetColor(128, 0, 0);
+        // iText(400, 550, "Welcome to Candy Rush!", GLUT_BITMAP_HELVETICA_18);
+
+        iSetColor(255, 255, 255);
+        // iText(400, 500, "Enter your username and press ENTER:", GLUT_BITMAP_HELVETICA_18);
+        iText(400, 470, username, GLUT_BITMAP_HELVETICA_18);
+
+        if (usernameEntered)
+        {
+            // Now show menu options after username entered
+            // iSetColor(255, 255, 255);
+            // iText(400, 380, "Press S to Start Game", GLUT_BITMAP_HELVETICA_18);
+            gameState = -1;
+        }
+    }
     if (gameState == -1)
     {
         iShowImage(0, 0, "Candy-Rush/UI/WelcomeNew.png");
@@ -485,7 +655,7 @@ void iDraw()
             PlaySound(TEXT("Candy-Rush/SoundEffect/playthroughmusic.wav"), NULL, SND_FILENAME | SND_ASYNC);
         }
         importantSoundsOn = false;*/
-        if (loading > 15)
+        if (loading > 30)
         {
             loading = 0;
             gameState = 0;
@@ -507,7 +677,9 @@ void iDraw()
         collisionNumber = 0;
         speedUpEffect = false;
         doubleFrostingsEffect = false;
+        saveScore = 0;
     }
+
     else if (gameState == 1)
     {
         iStopSound(bgSoundIdx);
@@ -519,7 +691,7 @@ void iDraw()
         if (speedUpEffect)
         {
             iShowImage(X - 58, Y + coordinateJump, "Candy-Rush/ExtraLabels/Adobe Express - file (40).png");
-            iShowImage(1170,screenwidth-170,  "Candy-Rush/ExtraLabels/MagicPotion.png");
+            iShowImage(1170, screenwidth - 170, "Candy-Rush/ExtraLabels/MagicPotion.png");
             drawHUD();
         }
         if (doubleFrostingsEffect)
@@ -645,12 +817,16 @@ void iDraw()
         checkCollision();
     }
 
+    // printf(" Score: %d", score);
+    // Image tagboard_img;
     if (gameState == 2)
     {
         // here i have to place my code for tagboard
         // First draw the background tagboard image (if any)
         // iShowImage(...); ← Add your tagboard BG image if used
-        iShowImage(0, 0, "Candy-Rush/UI/candy_fair_tag_boardpng (1).png");
+        // iLoadImage(&tagboard_img,"Candy-Rush/UI/pinkCandyFair.png");
+        // iResizeImage(&tagboard_img,1300,731);
+        iShowLoadedImage(0, 0, &tagboard_img);
 
         // Step 1: Highlight background row based on score
         highlightScoreRow(score);
@@ -667,16 +843,41 @@ void iDraw()
         char point[50];
         sprintf(point, "Your Score: %d", score); // totalFrostingCollected
         iSetColor(128, 0, 0);                    // 255,255,255
-        iText(590, 200, point, GLUT_BITMAP_HELVETICA_18);
+        iText(560, 200, point, GLUT_BITMAP_HELVETICA_18);
 
-        // printf(" Score: %d", score);
+        addToLeaderboard(username, score);
+        if (saveScore == 0)
+        {
+            saveLeaderboardToFile("leaderboard.txt");
+            saveScore = 1;
+        }
+        // saveLeaderboardToFile("leaderboard.txt");         // Step 3
+        //
+
         // iSetColor(255, 255, 255);
         // sprintf(point, "Score: %d", score);
         // iText(1038, screenwidth - 80, point, GLUT_BITMAP_HELVETICA_18);
 
         // GameOver();
         // showChar();
+
+        // or your actual score variable
+        // addPlayer(username, score);  // Example
     }
+    // gameState -1: Welcome Page
+    // gameState 0 : MenuPage
+    // gameState 1 : Actual Game
+    // gameState 2 : Gameover
+    // gameState 3 : How to Play
+    // gameState 4 : Options
+    // gameState 5 : about
+
+    // Leaderboard
+    /*else if (gameState == 3)
+    {
+        iShowBMP(0, 0, halloffame);
+        readScore();
+    }*/
 
     else if (gameState == 3)
     {
@@ -695,16 +896,23 @@ void iDraw()
 
         iShowImage(0, 0, "Candy-Rush/UI/About.png");
     }
+
+    if (gameState == 6)
+    {
+
+        drawLeaderboard();
+    }
 }
 void drawHUD()
 {
     if (speedUpEffect)
     {
         float remainingTime = 1.0f - (float)speedUpEffectActivatorTimer / 5;
-        iSetColor(0, 255,0);                                              // Green bar
-        iFilledRectangle(1180, screenwidth - 150, 100 * remainingTime, 10); // Progress bar
+        iSetColor(157, 233, 235);
+        iFilledRectangle(1180, screenwidth - 150, 100 * remainingTime, 10);
     }
 }
+
 void func_timers()
 {
 
@@ -718,25 +926,25 @@ void func_timers()
         }
     }
 
-    if (!enemy.active)
-    {
-        ++enemyDeadTimer;
-    }
-
     if (doubleFrostingsEffect)
     {
         ++doubleFrostingsEffectActivatorTimer;
-        if (doubleFrostingsEffectActivatorTimer > 300)
+        if (doubleFrostingsEffectActivatorTimer > 100)
         {
             doubleFrostingsEffect = false;
             doubleFrostingsEffectActivatorTimer = 0;
         }
     }
 
+    if (!enemy.active)
+    {
+        ++enemyDeadTimer;
+    }
+
     if (speedUpEffect)
     {
         ++speedUpEffectActivatorTimer;
-        if (speedUpEffectActivatorTimer > 80)
+        if (speedUpEffectActivatorTimer > 73)
         {
             speedUpEffect = false;
             speed = -25;
@@ -816,10 +1024,7 @@ void checkCollision()
             if (musicOn)
             {
                 PlaySound(TEXT("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                // iPlaySound("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav", false);
             }
-
-            charHurt = true;
 
             if (collisionNumber > 3)
             {
@@ -885,11 +1090,10 @@ void checkEnemyCollision()
                 if (musicOn)
                 {
                     PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                    //  iPlaySound("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav", false);
                 }
             }
         }
-        if (((Y + coordinateJump) < enemy.y + enemy.height && (Y + coordinateJump) + playerHeight > enemy.y) && !speedUpEffect && (X < enemy.x + enemy.width && X + playerWidth > enemy.x))
+        if ((X < enemy.x + enemy.width && X + playerWidth > enemy.x) && ((Y + coordinateJump) < enemy.y + enemy.height && (Y + coordinateJump) + playerHeight > enemy.y) && !speedUpEffect)
         {
             if (kill)
             {
@@ -897,9 +1101,8 @@ void checkEnemyCollision()
                 kill = false;
                 if (musicOn)
                 {
-                    // PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                    PlaySound(TEXT("SoundEffect/deadly-strike-352458.wav"), NULL, SND_FILENAME | SND_ASYNC);
                 }
-                iPlaySound("Candy-Rush/SoundEffect/mixkit-punch-through-air-2141.wav", false);
             }
             else if (second > 10)
             {
@@ -909,7 +1112,6 @@ void checkEnemyCollision()
                 if (musicOn)
                 {
                     PlaySound(TEXT("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                    // iPlaySound("Candy-Rush/SoundEffect/drop-sound-effect-240899.wav", false);
                 }
                 charHurt = true;
 
@@ -967,7 +1169,6 @@ void checkFrostingCollection()
                 if (musicOn & !importantSoundsOn)
                 {
                     PlaySound(TEXT("Candy-Rush/SoundEffect/coin-collision-sound-342335.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                    // iPlaySound("Candy-Rush/SoundEffect/coin-collision-sound-342335.wav", false);
                 }
                 printf("Coin collected at (%d, %d)! Total: %d\n", frostings[i].x, frostings[i].y, totalFrostingCollected);
             }
@@ -1008,11 +1209,12 @@ void drawFrostings()
 
 void setSpeedUpPower()
 {
-    speedUp.x = 1300 + 1000;
-    speedUp.y = Y + rand() % 200;
+
     speedUp.width = 60;
     speedUp.height = 90;
     speedUp.active = true;
+    speedUp.x = 1300 + 1000;
+    speedUp.y = Y + rand() % 200;
 }
 void rosteringSpeedUpPower()
 {
@@ -1020,10 +1222,10 @@ void rosteringSpeedUpPower()
     if (x == 1)
     {
 
-        speedUp.x = 1300 + 1000;
-        speedUp.y = Y + rand() % 200;
         speedUp.width = 60;
         speedUp.height = 90;
+        speedUp.x = 1300 + 1000;
+        speedUp.y = Y + rand() % 200;
         speedUp.active = true;
     }
 }
@@ -1051,7 +1253,6 @@ void gainSpeedUpPower()
         {
             importantSoundsOn = true;
             PlaySound(TEXT("Candy-Rush/SoundEffect/powerUp.wav"), NULL, SND_FILENAME | SND_ASYNC);
-            // iPlaySound("Candy-Rush/SoundEffect/powerUp.wav", false);
         }
         importantSoundsOn = false;
     }
@@ -1100,13 +1301,10 @@ void gainDoubleFrostingPower()
         {
             importantSoundsOn = true;
             PlaySound(TEXT("Candy-Rush/SoundEffect/powerUp.wav"), NULL, SND_FILENAME | SND_ASYNC);
-            // iPlaySound("Candy-Rush/SoundEffect/powerUp.wav", false);
         }
         importantSoundsOn = false;
     }
 }
-
-
 
 void charAnimations()
 {
@@ -1182,6 +1380,19 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     loadResources();
+    // tagboard
+    iLoadImage(&tagboard_img, "Candy-Rush/UI/pinkCandyFair.png");
+    iResizeImage(&tagboard_img, 1300, 731);
+    // lead username page;
+    iLoadImage(&usernameImage, "Candy-Rush/UI/usenameFinal.png");
+
+    // username
+    iResizeImage(&usernameImage, 1300, 731);
+    // username
+    // leaderboard
+    iLoadImage(&leaderboardImage, "Candy-Rush/UI/leaderboard (2).png");
+    iResizeImage(&leaderboardImage, 1300, 731);
+
     srand(time(0));
 
     setObstacle();
@@ -1194,7 +1405,7 @@ int main(int argc, char **argv)
 
     iSetTimer(100, generateBarriers);
     iSetTimer(300, generatePowerup);
-    iSetTimer(100, movePowerups);
+    iSetTimer(100, movePowerups); // call them in int main
     iSetTimer(500, hurtAnim);
 
     iSetTimer((100), moveEnemy);
@@ -1207,8 +1418,11 @@ int main(int argc, char **argv)
     iInitializeSound();
     bgSoundIdx = iPlaySound("Candy-Rush/SoundEffect/playthroughmusic.wav", true, 50);
     iInitialize(screenlength, screenwidth, "Candy-Rush");
+    // leaderBoard()
+    // loadLeaderboardFromFile("leaderboard.txt");
 
     glutMainLoop();
+    // FILE* fptr=fopen("scores.txt","w");
 
     return 0;
 }
